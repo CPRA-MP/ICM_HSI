@@ -1809,7 +1809,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             v2 =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))   # percent of cell that is wetland (includes floating marsh as of 6/30/20)
 
             if v2 < 65.:                       
-                S2 = 0.015*v2                                        
+                S2 = 0.0154*v2                                        
             else:                       
                 S2 = 1.0
 
