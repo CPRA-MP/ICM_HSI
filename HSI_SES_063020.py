@@ -1166,7 +1166,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             if v4 <= 9.0:
                 S4 = 1.0
             elif v4 < 18:
-                S4 = 2.0 - 0.11*v4
+                S4 = 1.98 - 0.11*v4
             else:
                 S4 = 0.0
 
