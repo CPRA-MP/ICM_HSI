@@ -32,8 +32,9 @@ def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header
     newHSIdict = {}
     
     
-def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
-
+#def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
+# 2023 Update -- SES 6/30/20 - removed ChlAdict, TSSdict and all variables becuase not used for 2023
+def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
     import numpy as np
     from dbfpy import dbf
     import os
@@ -49,10 +50,11 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 
     e = 2.718281828
     jan,feb,mar,apr,may,jun,jul,aug,sep,octb,nov,dec = 0,1,2,3,4,5,6,7,8,9,10,11
-    ChlA = ChlAdict.keys()
+ # 2023 Update -- SES 7/1/20 commented out all chlA and TSS in current code as not used in 2023 HSIs
+ #   ChlA = ChlAdict.keys()
     sal = saldict.keys()
     tmp = tmpdict.keys()
-    TSS = TSSdict.keys()
+ #   TSS = TSSdict.keys()
     dept = depthdict.keys()
     
 #    veg_ascii_grid = WM_params[61].lstrip().rstrip()
@@ -62,13 +64,21 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 
     ascii_grid_lookup = np.genfromtxt(grid_ascii_file,delimiter=' ',skiprows=6)
     ascii_header='nrows %s \nncols %s \nyllcorner %s \nxllcorner %s \ncellsize 500.0 \nnodata_value -9999.00' % (n500rows,n500cols,yll500,xll500)
-    
+
+ #    print ' Reading in cultch map for Oyster HSI'
+
+ # 2023 Update - SES 6/18/20 commented out cultch inputs for oysters and moved to front of program b/c Eric will create oyster HSI/dynamic cultch decadal maps that several HSIs will use   
+ #   cultchdict = {}
+ #   cnp = np.genfromtxt('OysterCultch.csv',skip_header=True,usecols=(0,5),delimiter=',')
+ #   for row in cnp:
+ #       gid = row[0]
+ #       cultchdict[gid] = row[1]
     
     
 # generate some dictionaries from the Hydro output files - these combine the monthly output from hydro into mean values for various time frames (e.g. annual, April-July, etc)
 # other input values that are used by specific HSIs will be written and deleted within the respective HSIs to minimize memory requirements
 # GridIDs from Ecohydro output file - this could be in a different order than n500grid, so use it as the dictionary key
-    ChlA_JanDec_ave = dict( (ChlA[n-1],1000.0*np.mean([ChlAdict[n][jan],ChlAdict[n][feb],ChlAdict[n][mar],ChlAdict[n][apr],ChlAdict[n][may],ChlAdict[n][jun],ChlAdict[n][jul],ChlAdict[n][aug],ChlAdict[n][sep],ChlAdict[n][octb],ChlAdict[n][nov],ChlAdict[n][dec]])) for n in range(1,n500grid+1))
+#    ChlA_JanDec_ave = dict( (ChlA[n-1],1000.0*np.mean([ChlAdict[n][jan],ChlAdict[n][feb],ChlAdict[n][mar],ChlAdict[n][apr],ChlAdict[n][may],ChlAdict[n][jun],ChlAdict[n][jul],ChlAdict[n][aug],ChlAdict[n][sep],ChlAdict[n][octb],ChlAdict[n][nov],ChlAdict[n][dec]])) for n in range(1,n500grid+1))
     sal_JanDec_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
     tmp_JanDec_ave = dict((tmp[n-1],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
     sal_AprJul_ave = dict((sal[n-1],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
@@ -139,7 +149,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 
     print ' Reclassifying Veg species output into general LULC types used by HSI equations.'
 # generate some blank dictionaries that will be filled with Veg output
-#    waterdict = {}
+    waterdict = {}    # Update 2023 turned waterdict back on b/c bald eagle uses "open water" habitat
     wetlndict = {}
     frattdict = {}
     frfltdict = {}
@@ -297,10 +307,12 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
     HSIcsv = r'%sBLUCJ.csv' % csv_outprefix
     HSIasc = r'%sBLUCJ.asc' % asc_outprefix
     
-
+    # 2023 Update -- SES 7/2/20 meet w/ Eric and Dave - Shaye update any sal, temp ranges and then Eric will read in gamm look-up table to overwrite S1, and delete at end
     # save input values that are only used in this HSI
-    sal_JanMarAugDec_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
-    tmp_JanMarAugDec_ave = dict((tmp[n-1],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
+    # Eric please also write out lnCPUE1 from gamm look-up tables
+    # commented out below because blue crab WQ SI update uses all months, and all months/full year average set above
+    #sal_JanMarAugDec_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
+    #tmp_JanMarAugDec_ave = dict((tmp[n-1],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
 
     with open(HSIcsv,'w') as fBC:
         
@@ -310,82 +322,111 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
         for gridID in gridIDs:
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
             
-            s = sal_JanMarAugDec_ave[gridID]
-            t = tmp_JanMarAugDec_ave[gridID]
-            v2 =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
-            dayv = 2.088
-            if s < 35.0:
-                if t < 35.0:
-                    lnCPUE1=0.8587-0.2451*dayv+0.07012*dayv**2.-0.03677*s+0.06561*t+0.000312*s**2.-0.00182*t**2.
-                    S1 =(e**lnCPUE1 - 1.)/2.47
-                else:
-                    S1 = 0.0
-            else:
-                S1 = 0.0
-                
-            if v2 < 25.:                       
-                S2 = 0.028*v2+0.3                     
-            elif v2 <= 80.:                       
-                S2 = 1.                       
-            else:                       
-                S2 = max(0,(5.-0.05*v2))
-            
-            S2 = S2
-            
-            HSI_juvBlueCrab = zero_mult*max(0,(S1*S2))**(1./2.)
+            s = sal_JanDec_ave[gridID]
+            t = tmp_JanDec_ave[gridID]
+            v2 =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))   # I think we get rid of adding btfordict????
+            savc = max(0.0,min(watsavdict[gridID],100.0))  
+            oysc = max(0.0,min(cultchdict[gridID],1.0))    # 2023 Update -- SES 7/1/20 Eric setting oyster cultch to mean oyster HSI per decade
+            dayv = 6.56
 
-#           writestring = '%s,%s\n' % (gridID,HSI_juvBlueCrab)
-            writestring = '%s,%s,%s,%s,%s\n' %(gridID,HSI_juvBlueCrab,s,t,v2)
+ # 2023 Update -- SES 7/2/20 - still set truncated s and t below for Eric to call lookup table based on s_1,t_1
+            s_1 = s
+            
+             if s > 36.8:
+              s_1 = 36.8
+
+            t_1 = t
+            
+             if t < 3.21:
+              t_1 = 3.21
+              
+             if t > 35.21:
+              t_1 = 35.21
+              
+ # 7/2/20 commented out below for Eric to delete or overwrite old S1 with gamm look-up table           
+ #           if s < 35.0:
+ #               if t < 35.0:
+ #                   lnCPUE1=0.8587-0.2451*dayv+0.07012*dayv**2.-0.03677*s+0.06561*t+0.000312*s**2.-0.00182*t**2.
+ #                   S1 =(e**lnCPUE1 - 1.)/2.47
+ #               else:
+ #                   S1 = 0.0
+ #           else:
+ #               S1 = 0.0
+                
+             if v2 < 25.:
+                S2 = 0.03*v2+0.25         # note three different functions for when v2s is less than 25.
+                 if oysc => 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
+                    S2 = 0.02*v2+0.5     
+                 if savc => 20.:             
+                    S2 = 0.0008*v2+0.8
+             elif v2 <= 80.:
+                S2 = 1.0
+             else:
+                S2 = max(0.0,(5.-0.05*v2))
+        
+            
+            HSI_juvBlueCrab = zero_mult*max(0.0,(S1*S2))**(1./2.)   # I left parentheses along here - guess it doesn't really matter, works either way
+
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_juvBlueCrab,s,s_1,t,t_1,v2,oysc,savc)
             fBC.write(writestring)
     
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
     
     # delete temporary variables so they do not accidentally get used in other HSIs
-    del(s,t,v2,dayv,lnCPUE1,S1,S2)
+    del(s,s_1,t,t_1,v2,oysc,savc,dayv,lnCPUE1,S1,S2)
 
     ########################################
     ##        Largemouth Bass HSI         ##
     ########################################
     print ' Calculating Largemouth Bass HSI'
-
-    sal_MarNov_ave = dict((sal[n-1],np.mean([saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov]]))for n in range(1,n500grid+1))
-    tmp_MarNov_ave = dict((tmp[n-1],np.mean([tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov]]))for n in range(1,n500grid+1))
-    TSS_MarNov_ave = dict((TSS[n-1],np.mean([TSSdict[n][mar],TSSdict[n][apr],TSSdict[n][may],TSSdict[n][jun],TSSdict[n][jul],TSSdict[n][aug],TSSdict[n][sep],TSSdict[n][octb],TSSdict[n][nov]]))for n in range(1,n500grid+1))
     
+  # 2023 Update -- SES 7/2/20 lots updated so just deleted or wrote over most old code
+  
     HSIcsv = r'%sLMBAS.csv' % csv_outprefix
     HSIasc = r'%sLMBAS.asc' % asc_outprefix
     
     
     with open(HSIcsv,'w') as fLMB:
 
-        headerstring = 'GridID,HSI,s,t,tss,ntu,v2,c,S1,S2,S3,lmb_zero_mult\n'
+        headerstring = 'GridID,HSI,s,s_1,t,t_1,v2,S1,S2,lmb_zero_mult\n'
         fLMB.write(headerstring)
 
         for gridID in gridIDs:
             # zero multiplier for LMB will set all HSIs for grid cells 
             lmb_zero_mult = land_mult[gridID]*bare_mult[gridID]
-            s = sal_MarNov_ave[gridID]
-            t = tmp_MarNov_ave[gridID]
-            tss = TSS_MarNov_ave[gridID]
+            s = sal_JanDec_ave[gridID]
+            t = tmp_JanDec_ave[gridID]
+ 
             v2 = max(0.0,min(wetlndict[gridID] + watsavdict[gridID] + btfordict[gridID] ,100.0))
-            c = ChlA_JanDec_ave[gridID]
 
+            dayv = 200.04
 
-            dayv = 1.99
-            dayv2 = 4.808
-            # convert TSS to turbidity - current conversion based median conversion from Lit review (
-            # tss = m*NTU + b
-            #m = 0.8
-            #b = -7.37
-            #ntu = max((tss - b)/m,0) # removed from equation #Edw - 8/3/2015
-            ntu = 0.0
+            s_1 = s
             
-            lnCPUE1 = 0.8752-1.7125*dayv+0.3768*dayv2-0.2759*s+0.007203*s**2.+0.3328*t-.0406*ntu-0.00764*t**2.+0.000632*ntu**2.
+             if s > 27.42:
+                s_1 = 27.42
 
-            if s <= 20:
-                S1 = (e**lnCPUE1 - 1.)/12.214
-            else:
-                S1 = 0.0
+            t_1 = t
+
+             if t < 7.14:
+                t_1 = 7.14
+
+             if t > 34.83:
+                t_1 = 34.83
+
+  #   all predictor variables are converted to z-scores using mean, sd from glmms in WQ SI memo
+          zscs = (s_1 - 0.84)/1.84
+          zscss = (s_1**2. - 4.08)/24.91
+          zsct = (t_1 - 22.68)/4.64
+          zsctt = (t_1**2. - 535.99)/206.16
+          
+
+            lnCPUE1 = 2.50 -0.25*zscs + 0.30*zsct - 0.04*zscss - 0.33*zsctt - 0.05*zscs*zsct
+            S1 = (e**lnCPUE1 - 1.)/14.30
+
+            if S1 < 0.:          # if S1 is negative, set to 0.
+                S1 = 0.              
+            
 
             if v2 < 20.:
                 S2 = 0.01
@@ -400,108 +441,16 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             else:
                 S2 = 0.
 
-            sdenom = (1+e**(-(c-35.75)/7.8414))
-            if sdenom <> 0.0:
-                S3 = 0.24+0.85/sdenom
-            else:
-                S3 = 0.0
+            HSI_LMBass = lmb_zero_mult*(S1*S2)**(1./2.)
 
-# ChlA not currently  calibrated, hardset S3 to 1.0 and c to -9999 for write statements
-            c = -9999.0
-            S3 = 1.0
-
-            HSI_LMBass = lmb_zero_mult*(S1*S2*S3)**(1./3.)
-
-            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_LMBass,s,t,tss,ntu,v2,c,S1,S2,S3,lmb_zero_mult)
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_LMBass,s,s_1,t,t_1,v2,S1,S2,lmb_zero_mult)
 
             fLMB.write(writestring)
     
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)            
-            
-    # delete any dictionaries that aren't used in any other HSIs - frees up memory
-    del(sal_MarNov_ave,tmp_MarNov_ave,TSS_MarNov_ave)
     
     # delete temporary variables so they do not accidentally get used in other HSIs
-    del(s,t,tss,c,dayv,v2,lnCPUE1,S1,S2,S3)
-
-########################################
-##          Bay Anchovy HSIs          ##
-########################################
-##      Juvenile Bay Anchovy HSI      ##
-########################################
-    print ' Calculating Juvenile and Adult Bay Anchovy HSIs'
-
-    HSIcsv = r'%sBAYAJ.csv' % csv_outprefix
-    HSIasc = r'%sBAYAJ.asc' % asc_outprefix
-
-    HSIcsv2 = r'%sBAYAA.csv' % csv_outprefix
-    HSIasc2 = r'%sBAYAA.asc' % asc_outprefix
-
-
-    with open(HSIcsv,'w') as fBAJ, open(HSIcsv2,'w') as fBAA:
-        
-        headerstring = 'GridID,HSI,s,t,c,v2\n'
-        fBAJ.write(headerstring)
-        fBAA.write(headerstring)
-        
-        for gridID in gridIDs:
-            zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
-            s = sal_JanDec_ave[gridID]
-            t = tmp_JanDec_ave[gridID]
-            c = ChlA_JanDec_ave[gridID]
-            v2j =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
-            v2a = v2j
-            dayv = 2.
-# Calculate variables for Juvenile Bay Anchovy
-            lnCPUE1j = -2.6496+0.8946*dayv-0.1896*dayv**2.-0.00678*s+0.4324*t-0.0003*s**2.+0.000008*(s*t)**2.-0.00023*t*s**2.-0.00924*t**2.
-            S1j = (e**lnCPUE1j - 1.)/30.14
-
-            if v2j < 25:
-                S2j = 0.028*v2j+0.3
-            elif v2j <= 80.:
-                S2j = 1.
-            else:
-                S2j = 5.-0.05*v2j
-
-            S3j = 4.18*e**(-4.59*e**(-0.02*c))/3.82
-
-# ChlA not currently  calibrated, hardset S3 to 1.0 and c to -9999 for write statements
-            c = -9999.0
-            S3j = 1.0
-
-            HSI_juvAnch = zero_mult*(S1j*S2j*S3j)**(1./3.)
-
-            writestring = '%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_juvAnch,s,t,c,v2j)
-            fBAJ.write(writestring)
-            
-########################################
-##       Adult Bay Anchovy HSI        ##
-########################################
-# Calculate variables for Adult Bay Anchovy
-            lnCPUE1a = 4.3195-0.363*s-0.3057*t+0.0108*s**2.+0.00872*t**2.+0.0632*s*t+0.000045*(s*t)**2.-0.00162*s*t**2.-0.00183*s**2.*t
-
-            S1a = (e**lnCPUE1a - 1.)/42.92
-
-            if v2a <= 30.:
-                S2a = 1.
-            else:
-                S2a = 1.43-0.0143*v2a
-
-            S3a = S3j
-
-            HSI_adltAnch = zero_mult*(S1a*S2a*S3a)**(1./3.)
-
-            writestring = '%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_adltAnch,s,t,c,v2a)
-            fBAA.write(writestring)
-
-# map juvenile bay anchovy HSI to Ascii grid
-    HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
-# map adult bay anchovy HSI to Ascii grid
-    HSIascii_grid(HSIcsv2,HSIasc2,ascii_grid_lookup,n500cols,n500rows,ascii_header)
-    
-# delete temporary variables so they do not accidentally get used in other HSIs
-    del(s,t,c,dayv,v2j,lnCPUE1j,S1j,S2j,S3j,v2a,lnCPUE1a,S1a,S2a,S3a)
-
+    del(s,s_1,t,t_1,dayv,v2,zscs,zscss,zsct,zsctt,lnCPUE1,S1,S2)
 
 ########################################
 ##         Gulf Menhaden HSIs         ##
@@ -510,10 +459,11 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 ########################################
     print ' Calculating Juvenile and Adult Gulf Menhaden HSIs'
 # save input values that are only used in this HSI
-    sal_JanJul_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
-    tmp_JanJul_ave = dict((tmp[n-1],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul]]))for n in range(1,n500grid+1))
-    sal_MarOct_ave = dict((sal[n-1],np.mean([saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb]]))for n in range(1,n500grid+1))
-    tmp_MarOct_ave = dict((tmp[n-1],np.mean([tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb]]))for n in range(1,n500grid+1))
+# 2023 Update -- SES 7/2/20 changed the months to match the WQ SI Memo 
+    sal_JanAug_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
+    tmp_JanAug_ave = dict((tmp[n-1],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul]]))for n in range(1,n500grid+1))
+    sal_MarNov_ave = dict((sal[n-1],np.mean([saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb]]))for n in range(1,n500grid+1))
+    tmp_MarNOv_ave = dict((tmp[n-1],np.mean([tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb]]))for n in range(1,n500grid+1))
 
     HSIcsv = r'%sGMENJ.csv' % csv_outprefix
     HSIasc = r'%sGMENJ.asc' % asc_outprefix
@@ -523,17 +473,30 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 
     with open(HSIcsv,'w') as fGMJ, open(HSIcsv2,'w') as fGMA:
 
-        headerstring = 'GridID,HSI,s,t,c,v2\n'
+        headerstring = 'GridID,HSI,s,s_1,t,t_1,v2\n'
         fGMJ.write(headerstring)
         fGMA.write(headerstring)
 
         for gridID in gridIDs:
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
-            sj = sal_JanJul_ave[gridID]
-            tj = tmp_JanJul_ave[gridID]
-            c = ChlA_JanDec_ave[gridID]
+            sj = sal_JanAug_ave[gridID]
+            tj = tmp_JanAug_ave[gridID]
+ #           c = ChlA_JanDec_ave[gridID]
             v2j = max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
             dayvj = 1.04
+
+            sj_1 = sj   # I assume you still need truncated min and max predictor variables for the gamm look-up tables
+            
+             if sj > 35.91:
+                sj_1 = 35.91
+
+            tj_1 = tj
+            
+             if tj < 3.21:
+                tj_1 = 3.21
+
+             if tj > 35.21:
+                tj_1 = 35.21
 
 # Calculate variables for Juvenile Gulf Menhaden
             lnCPUE1j = -0.4572+2.6189*dayvj-1.3848*dayvj**2.-0.06918*sj+0.1778*tj-0.00331*tj**2.
@@ -541,45 +504,61 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             S1j = (e**lnCPUE1j - 1.)/22.48
 
             if v2j < 25.:
-                S2j = 0.028*v2j+0.3
+                S2j = 0.02*v2j+0.5
             elif v2j <= 80.:
                 S2j = 1.
             else:
                 S2j = 5.-0.05*v2j
 
-            S3j = 4.18*e**(-4.59*e**(-0.02*c))/3.82
+#            S3j = 4.18*e**(-4.59*e**(-0.02*c))/3.82
             
 # ChlA not currently  calibrated, hardset S3 to 1.0 and c to -9999 for write statements
-            c = -9999.0
-            S3j = 1.0
+#            c = -9999.0
+#            S3j = 1.0
 
             
 
-            HSI_juvMenh = zero_mult*(S1j*S2j*S3j)**(1./3.)
+            HSI_juvMenh = zero_mult*(S1j*S2j)**(1./2.)
             
-            writestring = '%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_juvMenh,sj,tj,c,v2j)
+            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_juvMenh,sj,sj_1,tj,tj_1,v2j)
             fGMJ.write(writestring)
+            
 ########################################
 ##     Adult Gulf Menhaden HSI        ##
 ########################################
 # Calculate variables for Adult Gulf Menhaden
-            sa = sal_MarOct_ave[gridID]
-            ta = tmp_MarOct_ave[gridID]
+            sa = sal_MarNov_ave[gridID]
+            ta = tmp_MarNov_ave[gridID]
             v2a = v2j
             dayva = 1.8
-            lnCPUE1a = -0.9567+0.3062*dayva-0.1123*dayva**2.+0.01829*sa+0.1109*ta-0.00018*sa**2.-0.00008*ta*sa**2.-0.00263*ta**2.+0.000112*sa*ta**2.
 
-            S1a = (e**lnCPUE1a - 1.)/5.81
+            sa_1 = sa
+            
+             if sa > 36.8:
+                 sa_1 = 36.8
+
+            ta_1 = ta
+
+             if ta < 6.7:
+                ta_1 = 6.7
+
+            if ta > 35.9:
+                ta_1 = 35.9
+                
+ # replace below with GAMM look-up table for sa_1, ta_1           
+ #           lnCPUE1a = -0.9567+0.3062*dayva-0.1123*dayva**2.+0.01829*sa+0.1109*ta-0.00018*sa**2.-0.00008*ta*sa**2.-0.00263*ta**2.+0.000112*sa*ta**2.
+
+ #           S1a = (e**lnCPUE1a - 1.)/5.81
 
             if v2a <= 30.:
                 S2a = 1.
             else:
                 S2a = 1.43-0.0143*v2a
 
-            S3a = S3j
+ #           S3a = S3j
 
-            HSI_adltMenh = zero_mult*(S1a*S2a*S3a)**(1./3.)
-            writestring = '%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_adltMenh,sa,ta,c,v2a)
+            HSI_adltMenh = zero_mult*(S1a*S2a)**(1./2.)
+            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_adltMenh,sa,sa_1,ta,ta_1,v2a)
             fGMA.write(writestring)
 
 # map juvenile menhaden HSI to Ascii grid
@@ -591,7 +570,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
     del(sal_JanJul_ave,tmp_JanJul_ave,sal_MarOct_ave,tmp_MarOct_ave)
     
 # delete temporary variables so they do not accidentally get used in other HSIs
-    del(tj,c,dayvj,v2j,lnCPUE1j,S1j,S2j,S3j,sa,ta,dayva,v2a,lnCPUE1a,S1a,S2a,S3a)
+    del(sj_1,tj,tj_1,dayvj,v2j,lnCPUE1j,S1j,S2j,sa,sa_1,ta,ta_1,dayva,v2a,lnCPUE1a,S1a,S2a)
 
 
 ##############################################
@@ -600,8 +579,9 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 
     print ' Calculating Brown Shrimp HSIs'
 # save input values that are only used in this HSI
-    sal_AprJun_ave = dict((sal[n-1],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun]]))for n in range(1,n500grid+1))
-    tmp_AprJun_ave = dict((tmp[n-1],np.mean([tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun]]))for n in range(1,n500grid+1))
+# 2023 Update -- SES 6/27/20 updated a good bit of brown shrimp models, removed or wrote over old code
+# do not load sal_AprJul_ave because loaded up top for multiple species HSIs
+#    sal_AprJul_ave = dict((sal[n-1],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
     tmp_AprJul_ave = dict((tmp[n-1],np.mean([tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul]]))for n in range(1,n500grid+1))
 
     HSIcsv = r'%sBSHRS.csv' % csv_outprefix
@@ -613,76 +593,108 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 
     with open(HSIcsv,'w') as fBSS, open(HSIcsv2,'w') as fBST:
         
-        headerstring = 'GridID,HSI,s,t,v2\n'
+        headerstring_s = 'GridID,HSI,s,s1,t,t1,v2,oysc,savc\n'
+        headerstring_t = 'GridID,HSI,s,s1,t,t1,v2\n'
 
-        fBSS.write(headerstring)
-        fBST.write(headerstring)
+        fBSS.write(headerstring_s)
+        fBST.write(headerstring_t)
 
         for gridID in gridIDs:
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
-            ss = sal_AprJun_ave[gridID]
-            ts = tmp_AprJun_ave[gridID]
+            ss = sal_AprJul_ave[gridID]                # SES 7/2/20 per meeting: truncate sal and temp to min and max predictor values from WQ SI memo (Ann H and Laura D)
+            ss1 = ss
+             if ss > 33.0:                             # did not check if min less than 0.0 -- from WQ SI memo: sal range: 0-33 ppt; temp range: 12.91-35.21
+                 ss1 = 33.0                             # want to truncate predictor variables to return an HSI score rather than making it a zero or NA
+            ts = tmp_AprJul_ave[gridID]                # note to evaluate salinity or temp outputs for values beyond range rather than flagging w/ HSI score
+            ts1 = ts
+             if ts < 12.91:
+                ts1 = 12.91
+             if ts > 35.21:
+                ts1 = 35.21
             v2s =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
-            dayvs = 1.35
+            savc = max(0.0,min(watsavdict[gridID],100.0))
+            oysc = max(0.0,min(cultchdict[gridID],1.0))    # 2023 Update -- SES 7/1/20 Eric setting oyster cultch to mean oyster HSI for previous decade, calibration period for first decade
+ #           dayvs = 1.35
+            dayvs = 149.18     # set to mean julian date from WQ SI memo (Ann H and Laura D) for information only - not used
 
 ##############################################
 ##  Small Juvenile Brown Shrimp HSI - Seine ##
-##############################################            
-            lnCPUE1s = -15.9328+24.9838*dayvs-9.0311*dayvs**2.+0.2203*ss+0.02229*ts-0.00629*ss**2.+0.000544*ts**2.-0.00007*ss*ts**2.
-            S1s = (e**lnCPUE1s - 1.)/32.17
+##############################################
+
+    
+
+ #   all predictor variables are converted to z-scores using mean, sd from glmms in WQ SI memo
+          zscs = (ss1 - 7.94)/7.07
+          zscss = (ss1**2. - 112.91)/165.81
+          zsct = (ts1 - 26.87)/3.73
+          zsctt = (ts1**2. - 735.69)/191.54
+          
+
+            lnCPUE1s = 1.97 + 1.23*zscs + 1.66*zsct - 1.07*zscss - 1.53*zsctt - 0.12*zscs*zsct
+            S1s = (e**lnCPUE1s - 1.)/12.50
+
+            if S1s < 0.:          # if S1s is negative, set to 0.
+                S1s = 0.
+
 
             if v2s < 25.:
-                S2s = 0.028*v2s+0.3
+                S2s = 0.03*v2s+0.25         # note three different functions for when v2s is less than 25.
+                if oysc => 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
+                    S2s = 0.02*v2s+0.5     
+                if savc => 20.:             
+                    S2s = 0.0008*v2s+0.8
             elif v2s <= 80.:
-                S2s = 1.
+                S2s = 1.0
             else:
                 S2s = 5.-0.05*v2s
 
+
             HSI_BrShrSeine = zero_mult*max(0,(S1s*S2s))**(1./2.)
 
-            writestring = '%s,%s,%s,%s,%s\n' %(gridID,HSI_BrShrSeine,ss,ts,v2s)
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_BrShrSeine,ss,ss1,ts,ts1,v2s,oysc,savc)
             fBSS.write(writestring)
 
 #################################################
 ##     Large Juvenile Brown Shrimp HSI - Trawl ##
 #################################################
 
+            st = ss
+            st1 = st
+             if st > 37.61:                           # from WQ SI memo: sal range: 0-37.61; temp range: 11.65-35.21
+                 st1 = 37.61                           # want to truncate predictor variables to return an HSI score rather than making it a zero or NA
 
-            st = sal_AprJul_ave[gridID]
-            tt = tmp_AprJul_ave[gridID]
+            tt = ts
+            tt1 = tt
+             if tt < 11.65:
+                tt1 = 11.65
+             if tt > 35.21:
+                tt1 = 35.21
+        
             v2t = v2s
-            dayvt = 1.4578
-            gear =  0.0
+#            dayvt = 1.4578
+            dayvt = 151.09
+
+#   predictor variables are converted to z-scores using mean, sd from glmms in WQ SI memo
+          zscst = (st1 - 10.97)/8.03
+          zscsst = (st1**2. - 184.85)/216.00
+          zsct1 = (tt1 - 26.64)/3.73
+          zsctt1 = (tt1**2. - 723.40)/189.05
             
-            lnCPUE1t = -8.931-0.1434*st-0.1801*tt+0.003639*st**2.+0.006205*tt**2.+0.04524*st*tt+0.000034*st**2.*tt**2.-0.00126*st*tt**2.-0.00125*tt*st**2.+15.973*dayvt-5.3793*dayvt**2.+0.0676*gear
+           lnCPUE1t = 2.68 + 1.54*zscst + 0.86*zsct1 - 1.51*zscsst - 0.72*zsctt1 - 0.18*zscst*zsct1
             
-            S1t = (e**lnCPUE1t - 1.)/50.55
+           S1t = (e**lnCPUE1t - 1.)/24.61
 
-# salinity conditional filter on S1a
-            smult = 1.0
-#            if st < 4.:
-#                smult = 0.
-#            else:
-#                smult = 1.
-
-# temperature conditional filter on S1a
-            if tt < 4.:
-                tmult = 0.
-            elif tt> 32.:
-                tmult = 0.
-            else:
-                tmult = 1.
-
-            S1t = S1t*smult*tmult
+            if S1t < 0.:          # if S1t is negative, set to 0.
+                S1t = 0.
 
             if v2t <= 30.:
                 S2t = 1.
             else:
                 S2t = 1.43-0.0143*v2t
 
-            HSI_BrShrTrawl = zero_mult*max(0,(S1t*S2t))**(1./2.)
+            HSI_BrShrTrawl = zero_mult*max(0,(S1t*S2t)**(1./2.))
 
-            writestring = '%s,%s,%s,%s,%s\n' %(gridID,HSI_BrShrTrawl,st,tt,v2t)
+            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_BrShrTrawl,st,st1,tt,tt1,v2t)
             fBST.write(writestring)
 
 # map juvenile shrimp HSI to Ascii grid
@@ -691,52 +703,65 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
     HSIascii_grid(HSIcsv2,HSIasc2,ascii_grid_lookup,n500cols,n500rows,ascii_header)
 
 # delete any dictionaries that aren't used in any other HSIs - frees up memory
-    del(sal_AprJun_ave,tmp_AprJun_ave,tmp_AprJul_ave)
+    del(tmp_AprJul_ave)
 
 # delete temporary variables so they do not accidentally get used in other HSIs
-    del(ss,ts,dayvs,v2s,lnCPUE1s,S1s,S2s,st,tt,dayvt,v2t,lnCPUE1t,S1t,S2t)
+    del(ss,ss1,ts,ts1,dayvs,v2s,lnCPUE1s,S1s,S2s,savc,oysc,st,st1,tt,tt1,dayvt,v2t,lnCPUE1t,S1t,S2t)
+    del(zscs,zscss,zsct,zsctt,zscst,zscsst,zsct1,zsctt1)
 
 
 ########################################
 ##        Eastern Oyster HSI          ##
 ########################################
-    print ' Reading in cultch map for Oyster HSI'
-    
-    cultchdict = {}
-    cnp = np.genfromtxt('OysterCultch.csv',skip_header=True,usecols=(0,5),delimiter=',')
+   
+ 
+ # 2023 Update - SES 6/18/20 added sedimentation dictionary (Eric will build) in same format as cultch input file
+ # Note Eric will need to build us sediments.csv file from ICM outputs
+ # Eric: cumulative sediment accretion in mm per year by cell                      
+    seddict = {}
+    cnp = np.genfromtxt('sediments.csv',skip_header=True,usecols=(0,5),delimiter=',')
     for row in cnp:
         gid = row[0]
-        cultchdict[gid] = row[1]
+        seddict[gid] = row[1]
 
     print ' Calculating Eastern Oyster HSI'
 # save input values that are only used in this HSI
-    sal_JanDec_min = dict((sal[n-1],min(saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec])) for n in range(1,n500grid+1))
-    sal_MaySep_ave = dict((sal[n-1],np.mean([saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep]]))for n in range(1,n500grid+1))
-
+#    sal_JanDec_min = dict((sal[n-1],min(saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec])) for n in range(1,n500grid+1))
+# 2023 Update -- SES 6/18/20 minimum monthly salinity changed to minimum_AprSept and min_OctMar
+    sal_AprSep_min = dict((sal[n-1],min(saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep])) for n in range(1,n500grid+1))
+    sal_OctMar_min = dict((sal[n-1],min(saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][octb],saldict[n][nov],saldict[n][dec])) for n in range(1,n500grid+1))
+#    sal_MaySep_ave = dict((sal[n-1],np.mean([saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep]]))for n in range(1,n500grid+1))
+# 2023 Update -- SES 6/18/20 expanded mean spawning salinity from April-November
+    sal_AprNov_ave = dict((sal[n-1],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov]]))for n in range(1,n500grid+1))
+   
     HSIcsv = r'%sOYSTE.csv' % csv_outprefix
     HSIasc = r'%sOYSTE.asc' % asc_outprefix
 
 
     with open(HSIcsv,'w') as fEO:
         
-        headerstring = 'GridID,HSI,s_maysep,s_min,s_mean,cultch,pct_land\n'
+#        headerstring = 'GridID,HSI,s_maysep,s_min,s_mean,cultch,pct_land\n'
+        headerstring = 'GridID,HSI,s_aprnov,s_minw,s_minc,s_mean,pct_land,sedim\n'
         fEO.write(headerstring)
 
+# 2023 Update --- SES 6/18/20 sav2_w and _c added, sedim added and cultch turned off
         for gridID in gridIDs:
-            sav1 = sal_MaySep_ave[gridID]
-            sav2 = sal_JanDec_min[gridID]
+            sav1 = sal_AprNov_ave[gridID]
+            sav2_w = sal_AprSep_min[gridID]
+            sav2_c = sal_OctMar_min[gridID]
             sav3 = sal_JanDec_ave[gridID]
-            cultch = cultchdict[gridID]
+ #           cultch = cultchdict[gridID]  turned off for 2023 Update in oyster HSI - using for other species based on averaged oyster HSI scores per decade
             pland = landdict[gridID]/100.0
+            sedim = seddict[gridID]
             
             
-            if cultch <= 10.:
-                S1 = 0.04*cultch
-            elif cultch <= 30.:
-                S1 = 0.02*cultch + 0.2
-            elif cultch <= 50.:
-                S1 = 0.01*cultch + 0.5
-            else:
+ #           if cultch <= 10.:
+ #               S1 = 0.04*cultch
+ #           elif cultch <= 30.:
+ #               S1 = 0.02*cultch + 0.2
+ #           elif cultch <= 50.:
+ #               S1 = 0.01*cultch + 0.5
+ #           else:
                 S1 = 1.0
 
 #            if cultch < 10.:
@@ -754,7 +779,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 
 
 
- #AH - i revised all of these below based on email from Mandy with attachment
+ #AH - 2017 i revised all of these below based on email from Mandy with attachment
             if sav1 < 5.:
                 S2 = 0.
             elif sav1 < 10.:
@@ -773,18 +798,35 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
                 S2 = -0.02*sav1+0.8
             else:
                 S2 = 0.0
-
-            if sav2 < 2.:
-                S3 = 0.0
-            elif sav2 < 4.:
-                S3 = 0.025*sav2-0.05
-            elif sav2 < 6.:
-                S3 = 0.225*sav2-0.85
-            elif sav2 < 8.:
-                S3 = 0.25*sav2-1.0
+# 2023 Update -- SES 6/18/20 revised for warm and cold in a combined S3
+            if sav2_w < 2.:
+                S3w = 0.0
+            elif sav2_w < 8.:
+                S3w = 0.1668*sav2_w-0.33
+            elif sav2_w < 10.:
+                S3w = 1.0
+            elif sav2_w < 15.:
+                S3w = -0.16*sav2_w+2.6
+            elif sav2_w < 20.:
+                S3w = -0.04*sav2_w+0.8
             else:
-                S3 = 1.0
+                S3w = 0.0
 
+            if sav2_c < 1.:
+                S3c = 0.0
+            elif sav2_c < 8.:
+                S3c = 0.1429*sav2_c-0.1429
+            elif sav2_c < 10.:
+                S3c = 1.0
+            elif sav2_c < 15.:
+                S3c = -0.16*sav2_c+2.6
+            elif sav2_c < 20.:
+                S3c = -0.04*sav2_c+0.8
+            else:
+                S3c = 0.0
+
+            S3 = (S3w*S3c)**(1./2.)
+# 2023 Update -- SES 6/18/20 mean annual salinity function revised
             if sav3 < 5.:
                 S4 = 0.
             elif sav3 < 10.:
@@ -792,32 +834,39 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             elif sav3 < 15.:
                 S4 = 1.
             elif sav3 < 20.:
-                S4 = -0.08*sav3+2.2
+                S4 = -0.16*sav3+3.4
             elif sav3 < 25.:
-                S4 = -0.07*sav3+2.0
-            elif sav3 < 30.:
-                S4 = -0.03*sav3+1.0
-            elif sav3 < 35.:
-                S4 = -0.01*sav3+0.4
-            elif sav3 < 40.:
-                S4 = -0.01*sav3+0.4
+                S4 = -0.04*sav3+1.0
             else:
                 S4 = 0.0
 
             S5 = 1.0-pland
 
-            HSI_EOys = (S1*S2*S3*S4*S5)**(1./5.)
             
-            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_EOys,sav1,sav2,sav3,cultch,pland)
+            if sedim < 35.:
+                S6 = 1.0
+            elif sedim < 40.:
+                S6 = -0.2*sedim+8.0
+            else:
+                S6 = 0.0
+
+ #           HSI_EOys = (S1*S2*S3*S4*S5)**(1./5.)
+            HSI_EOys = (S1*S2*S3*S4*S5*S6)**(1./6.)
+            
+ #           writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_EOys,sav1,sav2,sav3,cultch,pland)
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_EOys,sav1,sav2_w,sav2_c,sav3,pland,sedim)
+ 
             fEO.write(writestring)
 
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
 
 # delete any dictionaries that aren't used in any other HSIs - frees up memory
-    del(sal_JanDec_min,sal_MaySep_ave,cultchdict)
+#    del(sal_JanDec_min,sal_MaySep_ave,cultchdict)
+    del(sal_AprSep_min,sal_OctMar_min,sal_AprNov_ave,seddict)
 
 # delete temporary variables so they do not accidentally get used in other HSIs
-    del(sav1,sav2,sav3,cultch,S1,S2,S3,S4,S5,cnp)
+# 2023 Update -- SES 6/18/20 removed cultch and added sav2_w, _c, sedim, and S6 variables
+    del(sav1,sav2_w,sav2_c,sav3,sedim,S1,S2,S3,S4,S5,S6,cnp)
 
 
 ########################################
@@ -839,16 +888,32 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
     
     with open(HSIcsv,'w') as fSSJ, open(HSIcsv2,'w') as fSSA:
         
-        headerstring = 'GridID,HSI,s,t,v2\n'
-        fSSJ.write(headerstring)
-        fSSA.write(headerstring)
+        headerstring1 = 'GridID,HSI,s,s_1,t,t_1,v2,savc\n'
+        headerstring2 = 'GridID,HSI,s,s_1,t,t_1,v2\n'
+        fSSJ.write(headerstring1)
+        fSSA.write(headerstring2)
 
         for gridID in gridIDs:
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
             sj = sal_SepNov_ave[gridID]
             tj = tmp_SepNov_ave[gridID]
             v2j =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
+            savc = max(0.0,min(watsavdict[gridID],100.0))
             dayvj = 2.9006
+
+            sj_1 = sj
+            
+             if sj > 36.8:
+                sj_1 = 36.8
+
+            tj_1 = tj
+
+             if tj < 6.2:
+                tj_1 = 6.2
+
+             if tj > 33.9:
+                tj_1 = 33.9
+                
 
 # Calculate variables for Juvenile Spotted Seatrout
             lnCPUE1j = -8.6532+6.2748*dayvj-1.1591*dayvj**2.+0.0251*sj+0.07216*tj-0.00077*sj**2.-0.00000085*sj**2.*tj**2.-0.00168*tj**2.
@@ -856,15 +921,18 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             S1j = (e**lnCPUE1j - 1.)/1.029
 
             if v2j < 25.:
-                S2j = 0.5 + 0.02*v2j
+                S2j = 0.1 + 0.036*v2j
+              if savc => 20.:
+                S2j = 0.8 + 0.008*v2j
             elif v2j <= 80:
                 S2j = 1.0
             else:
                 S2j = 5.0 - 0.05*v2j
             
-            HSI_juvSStr = zero_mult*(max(0,S1j)**(2./3.))*(max(0,S2j)**(1./3.))
+ #           HSI_juvSStr = zero_mult*(max(0,S1j)**(2./3.))*(max(0,S2j)**(1./3.))
+            HSI_juvSStr = zero_mult*(S1j*S2J)**(1./2.)
             
-            writestring = '%s,%s,%s,%s,%s\n' %(gridID,HSI_juvSStr,sj,tj,v2j)
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_juvSStr,sj,sj_1,tj,tj_1,v2j,savc)
             fSSJ.write(writestring)
             
 
@@ -876,6 +944,19 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             v2a = v2j
             dayva = 1.805
 
+            sa_1 = sa
+            
+             if sa > 36.8:
+               sa_1 = 36.8
+
+            ta_1 = ta
+
+             if ta < 3.35:
+                ta_1 = 3.35
+
+             if ta > 35.9:
+                ta_1 = 35.9
+
 # Calculate variables for Adult Spotted Seatrout
             lnCPUE1a = -0.2433-0.00983*dayva-0.0109*dayva**2.-0.02731*sa+0.0904*ta+0.00357*sa*ta+0.00144*sa**2.+0.000007*sa**2.*ta**2.-0.00027*ta*sa**2.-0.00233*ta**2.
 
@@ -886,13 +967,13 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             elif v2a <= 70.:
                 S2a = 1.0
             elif v2a < 100.:
-                S2a = 3.33 - 0.033*v2a
+                S2a = 3.33 - 0.0333*v2a
             else:
                 S2a = 0.0
                 
             HSI_adltSStr = zero_mult*max(0,(S1a*S2a))**(1./2.)
             
-            writestring = '%s,%s,%s,%s,%s\n' %(gridID,HSI_adltSStr,sa,ta,v2a)
+            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_adltSStr,sa,sa_1,ta,ta_1,v2a)
             fSSA.write(writestring)
 
 # map juvenile seatrout HSI to Ascii grid
@@ -904,7 +985,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
     del(sal_SepNov_ave,tmp_SepNov_ave)
 
 # delete temporary variables so they do not accidentally get used in other HSIs
-    del(sj,tj,v2j,dayvj,lnCPUE1j,S1j,S2j,sa,ta,v2a,dayva,lnCPUE1a,S1a,S2a)
+    del(sj,sj_1,tj,tj_1,v2j,savc,dayvj,lnCPUE1j,S1j,S2j,sa,sa_1,ta,ta_1,v2a,dayva,lnCPUE1a,S1a,S2a)
 
 
 ########################################
@@ -913,102 +994,136 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 
     print ' Calculating White Shrimp HSIs'
 # save input values that are only used in this HSI
-    sal_JunNov_ave = dict((sal[n-1],np.mean([saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov]]))for n in range(1,n500grid+1))
-    tmp_JunNov_ave = dict((tmp[n-1],np.mean([tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov]]))for n in range(1,n500grid+1))
-    sal_JulOct_ave = dict((sal[n-1],np.mean([saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb]]))for n in range(1,n500grid+1))
-    tmp_JulOct_ave = dict((tmp[n-1],np.mean([tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb]]))for n in range(1,n500grid+1))
+# 2023 Update -- SES 7/2/20 lots of white shrimp updates so just deleting or overwriting most of the old code
+    sal_JunDec_ave = dict((sal[n-1],np.mean([saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
+    tmp_JunDec_ave = dict((tmp[n-1],np.mean([tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
+# 2023 Update - SES 7/2/20 changed white shrimp trawl to entire year, and sal and temp set for entire year in top of code for multiple species
+#    sal_JulOct_ave = dict((sal[n-1],np.mean([saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb]]))for n in range(1,n500grid+1))
+#    tmp_JulOct_ave = dict((tmp[n-1],np.mean([tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb]]))for n in range(1,n500grid+1))
     
     HSIcsv = r'%sWSHRS.csv' % csv_outprefix
     HSIasc = r'%sWSHRS.asc' % asc_outprefix
 
     HSIcsv2 = r'%sWSHRL.csv' % csv_outprefix
     HSIasc2 = r'%sWSHRL.asc' % asc_outprefix
-
-
-    ##do not calculate Large Juvenile White Shrimp Trawl HSI            
-    #with open(HSIcsv,'w') as fWSS, open(HSIcsv2,'w') as fWST:
-    ##do not calculate Large Juvenile White Shrimp Trawl HSI            
+           
+    with open(HSIcsv,'w') as fWSS, open(HSIcsv2,'w') as fWST:         
     
-    with open(HSIcsv,'w') as fWSS:
-        headerstring = 'GridID,HSI,s,t,v2\n'
-        fWSS.write(headerstring)
- 
- ##do not calculate Large Juvenile White Shrimp Trawl HSI            
- #       fWST.write(headerstring)
- ##do not calculate Large Juvenile White Shrimp Trawl HSI                   
+        headerstring1 = 'GridID,HSI,s,s1,t,t1,v2,oysc,sav\n'
+        headerstring2 = 'GridID,HSI,s,s1,t,t1,v2\n'
+        fWSS.write(headerstring1)         
+        fWST.write(headerstring2)
+                  
  
         for gridID in gridIDs:
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
-            ss = sal_JunNov_ave[gridID]
-            ts = tmp_JunNov_ave[gridID]
-            v2s =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
-            dayvs = 2.543
+            ss = sal_JunDec_ave[gridID]    # SES 7/2/20 per meeting: truncate sal and temp to min and max predictor values from WQ SI memo (Ann H and Laura D)
+            ss1 = ss
+             if ss > 36.80:
+              ss1 = 36.80
+            ts = tmp_JunDec_ave[gridID]
+            ts1 = ts
+             if ts < 4.71:
+              ts1 = 4.71
+             if ts > 35.21:
+              ts1 = 35.21
+            v2s =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))  # Eric: I don't follow why btfor added to wetland? Btfor = swafor but forests not same as wetlands for species
+            savc = max(0.0,min(watsavdict[gridID],100.0))
+            oysc = max(0.0,min(cultchdict[gridID],1.0))    # 2023 Update -- SES 7/1/20 Eric setting oyster cultch to mean oyster HSI for previous decade, calibration period for first decade
+            dayvs = 266.46   # SES 7/2/20 set to mean julian date from WQ SI memo for information - not used
 
 ################################################
 ##   Small Juvenile White Shrimp HSI - Seine  ##
 ################################################
 
-            lnCPUE1s = -7.9150+8.1556*dayvs-1.6101*dayvs**2.-0.03471*ss+0.009624*ts+0.01385*ss*ts-0.00264*ss**2.-0.00115*ts**2.-0.00034*ss*ts**2.
+    #   all predictor variables are converted to z-scores using mean, sd from glmms in WQ SI memo
+          zscs = (ss1 - 10.69)/7.72
+          zscss = (ss1**2. - 173.92)/208.18
+          zsct = (ts1 - 24.39)/6.33
+          zsctt = (ts1**2. - 635.09)/283.81
+          
 
-            S1s = (e**lnCPUE1s - 1.)/24.68
+            lnCPUE1s = 1.63 + 0.61*zscs + 1.69*zsct - 0.54*zscss - 2.02*zsctt - 0.08*zscs*zsct
+            S1s = (e**lnCPUE1s - 1.)/10.05
+
+            if S1s < 0.:          # if S1s is negative, set to 0.
+                S1s = 0.
+
 
             if v2s < 25.:
-                S2s = 0.028*v2s+0.3
+                S2s = 0.03*v2s+0.25         # note three different functions for when v2s is less than 25.
+                if oysc => 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
+                    S2s = 0.02*v2s+0.5     
+                if savc => 20.:             
+                    S2s = 0.0008*v2s+0.8
             elif v2s <= 80.:
-                S2s = 1.
+                S2s = 1.0
             else:
                 S2s = 5.-0.05*v2s
+                
 
-            HSI_juvWhShrS = zero_mult*max(0,(S1s*S2s))**(1./2.)
+            HSI_juvWhShrS = zero_mult*max(0,(S1s*S2s)**(1./2.))    # 2023 Update -- moved closed parenthesis -- looked to be in wrong place after (S1s*S2s)) 
             
-            writestring = '%s,%s,%s,%s,%s\n'  %(gridID,HSI_juvWhShrS,ss,ts,v2s)
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s\n'  %(gridID,HSI_juvWhShrS,ss,ss1,ts,ts1,v2s,oysc,savc)
             fWSS.write(writestring)
 
-##do not calculate Large Juvenile White Shrimp Trawl HSI            
-##
 ##################################################
 ####   Large Juvenile White Shrimp HSI - Trawl  ##
 ##################################################
-##
-##
-##            st = sal_JulOct_ave[gridID]
-##            tt = tmp_JulOct_ave[gridID]
-##            v2t = v2s
-##            dayvt = 2.394
-##
-##            lnCPUE1t = -08.2435+1.248*st+0.3732*tt-0.03476*st**2.-0.00751*tt**2.-0.08411*st*tt-0.00004*st**2.*tt**2.+0.00141*st*tt**2.+0.002221*tt*st**2.+4.6448*dayvt-0.8693*dayvt**2.
-##
-##            S1t = (e**lnCPUE1t - 1.)/53.93
-##
-##            if v2t > 30.:
-##                S2t = -0.0143*v2t+1.429
-##            else:
-##                S2t = 1.
-##
-##            HSI_juvWhShrT = zero_mult*max(0,(S1t*S2t))**(1./2.)
-##            
-##            writestring = '%s,%s,%s,%s,%s\n'  %(gridID,HSI_juvWhShrT,st,tt,v2t)
-##            fWST.write(writestring)
-##do not calculate Large Juvenile White Shrimp Trawl HSI            
+
+
+            st = sal_JanDec_ave[gridID]
+            tt = tmp_JanDec_ave[gridID]
+
+            st1 = st
+            if st > 39.31:                             # from WQ SI memo: sal range: 0-39.31; temp range: 2.5-35.35
+                 st1 = 39.31                           # want to truncate predictor variables to return an HSI score rather than making it a zero or NA
+
+            tt1 = tt
+             if tt < 2.5:
+                tt1 = 2.5
+             if tt > 35.35:
+                tt1 = 35.35
+            
+            v2t = v2s
+            dayvt = 179.81
+
+  #   predictor variables are converted to z-scores using mean, sd from glmms in WQ SI memo
+          zscst = (st1 - 12.89)/8.41
+          zscsst = (st1**2. - 236.98)/249.53
+          zsct1 = (tt1 - 23.20)/6.46
+          zsctt1 = (tt1**2. - 579.80)/278.79
+            
+           lnCPUE1t = 1.57 + 0.08*zscst + 1.00*zsct1 - 0.40*zscsst - 1.27*zsctt1 - 0.24*zscst*zsct1
+            
+           S1t = (e**lnCPUE1t - 1.)/6.83
+
+            if S1t < 0.:          # if S1t is negative, set to 0.
+                S1t = 0.
+
+            if v2t <= 30.:
+                S2t = 1.
+            else:
+                S2t = 1.43-0.0143*v2t
+
+
+            HSI_juvWhShrT = zero_mult*max(0.0,(S1t*S2t))**(1./2.)     # I was moving closed parenthesis to after 1/2, but maybe value so small you want to get max before?
+                                                            
+            writestring = '%s,%s,%s,%s,%s,%s,%s\n'  %(gridID,HSI_juvWhShrT,st,st1,tt,tt1,v2t)
+            fWST.write(writestring)         
 
 # map white shrimp seine HSI to Ascii grid
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
-
-##do not calculate Large Juvenile White Shrimp Trawl HSI            
-### map white shrimp trawl HSI to Ascii grid
-##    HSIascii_grid(HSIcsv2,HSIasc2,ascii_grid_lookup,n500cols,n500rows,ascii_header)
-##do not calculate Large Juvenile White Shrimp Trawl HSI            
+          
+# map white shrimp trawl HSI to Ascii grid
+    HSIascii_grid(HSIcsv2,HSIasc2,ascii_grid_lookup,n500cols,n500rows,ascii_header)           
 
 # delete any dictionaries that aren't used in any other HSIs - frees up memory
-    del(sal_JunNov_ave,tmp_JunNov_ave,sal_JulOct_ave,tmp_JulOct_ave)
+    del(sal_JunDec_ave,tmp_JunDec_ave)
 
 # delete temporary variables so they do not accidentally get used in other HSIs
-    del(ss,ts,v2s,dayvs,lnCPUE1s,S1s,S2s)
-    
-    ##do not calculate Large Juvenile White Shrimp Trawl HSI            
-    #del(st,tt,v2t,dayvt,lnCPUE1t,S1t,S2t)
-    ##do not calculate Large Juvenile White Shrimp Trawl HSI            
-
+    del(ss,ss1,ts,ts1,v2s,oysc,savc,dayvs,zscs,zscss,zsct,zsctt,lnCPUE1s,S1s,S2s)          
+    del(st,st1,tt,tt1,v2t,dayvt,zscst,zscsst,zsct1,zsctt1,lnCPUE1t,S1t,S2t)        
 
 ######################################
 ##         MOTTLED DUCK HSI         ##
@@ -1124,7 +1239,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             if v4 <= 9.0:
                 S4 = 1.0
             elif v4 < 18:
-                S4 = 2.0 - 0.11*v4
+                S4 = 1.98 - 0.11*v4
             else:
                 S4 = 0.0
 
@@ -1223,7 +1338,9 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             else:
                 w_saline = max(0,min(w,100.0-vegland))
             
-            S1 = 0.68*(v1a + w_fresh)/100.0 + 0.68*v1b/100.0 + (v1c + w_inter)/100.0 + 0.50*(v1d +  w_brack)/100.0 + 0.09*(v1e + w_saline)/100.0 + 0.25*v1f/100.0 + 0.25*v1g/100.0
+            #S1 = 0.68*(v1a + w_fresh)/100.0 + 0.68*v1b/100.0 + (v1c + w_inter)/100.0 + 0.50*(v1d +  w_brack)/100.0 + 0.09*(v1e + w_saline)/100.0 + 0.25*v1f/100.0 + 0.25*v1g/100.0
+            # 2023 Update -- SES 6/18/20
+            S1 = 0.68*(v1a + w_fresh)/100.0 + 0.68*v1b/100.0 + (v1c + w_inter)/100.0 + 0.50*(v1d +  w_brack)/100.0 + 0.09*(v1e + w_saline)/100.0 + 0.05*v1f/100.0 + 0.05*v1g/100.0
             
             v2 = watsavdict[gridID]/100.0     #watsavdict is in percentages, therefore divide by 100 to get V2 in correct unit
             if v2 < 0.30:
@@ -1352,7 +1469,9 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             else:
                 w_saline = max(0,min(w,100.0-vegland))
             
-            S1 = (v1a + w_fresh)/100.0 + v1b/100.0 + 0.60*(v1c + w_inter)/100.0 + 0.93*(v1d +  w_brack)/100.0 + 0.46*(v1e + w_saline)/100.0 + 0.25*v1f/100.0 + 0.25*v1g/100.0
+  #          S1 = (v1a + w_fresh)/100.0 + v1b/100.0 + 0.60*(v1c + w_inter)/100.0 + 0.93*(v1d +  w_brack)/100.0 + 0.46*(v1e + w_saline)/100.0 + 0.25*v1f/100.0 + 0.25*v1g/100.0
+  #   2023 Update - SES 7/1/20 - lowered 0.25 to 0.05 for v1e and v1f just in case need for gadwall per D. Lindquist - coding error fixed too w/ v1g and v1e mixed up in above eqn
+            S1 = (v1a + w_fresh)/100.0 + v1b/100.0 + 0.60*(v1c + w_inter)/100.0 + 0.93*(v1d +  w_brack)/100.0 + 0.46*(v1g + w_saline)/100.0 + 0.05*v1e/100.0 + 0.05*v1f/100.0
 
             v2 = max(0.0,min(watsavdict[gridID]+waterdict[gridID],100.0))/100.0     #watsavdict is in percentages,  therefore divide by 100 to get V2 in correct unit
             
@@ -1565,25 +1684,35 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 ############################
 #   sal_OctJun_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][octb],saldict[n][nov],saldict[n][dec]))for n in range(1,n500grid+1))
     print ('Calculating Crawfish HSI.')
+    # 2023 Update - SES 6/18/20 - saving new inputs for just this HSI - this changed from 2017 so old inputs are still saved above (dep_OctJun_ave[gridID] and dep_JulSep_ave[gridID])
+    dep_DecJul_ave = dict((dept[n-1],np.mean([depthdict[n][jan],depthdict[n][feb],depthdict[n][mar],depthdict[n][apr],depthdict[n][may],depthdict[n][jun],depthdict[n][jul],depthdict[n][dec]]))for n in range(1,n500grid+1))
+    dep_AugNov_ave = dict((dept[n-1],np.mean([depthdict[n][aug],depthdict[n][sep],depthdict[n][octb],depthdic[n][nov]]))for n in range(1,n500grid+1))
     
     HSIcsv = r'%sCRAYF.csv' % csv_outprefix
     HSIasc = r'%sCRAYF.asc' % asc_outprefix
 
     with open(HSIcsv,'w') as fCF:
         
-        headerstring = 'GridID,HSI,s,dep_OctJun,dep_JulSep,swamp_for,fresh,water,inter,brack,sand\n'
+        #headerstring = 'GridID,HSI,s,dep_OctJun,dep_JulSep,swamp_for,fresh,water,inter,brack,sand\n'
+        # 2023 Update - SES 6/18/20 - created new header b/c removed sand as variable and changed dep_Months
+        headerstring = 'GridID,HSI,s,dep_DecJul,dep_AugNov,swamp_for,fresh,water,inter,brack\n'
         fCF.write(headerstring)
     
         for gridID in gridIDs:
             s = sal_JanDec_ave[gridID]
-            depoj = 100*dep_OctJun_ave[gridID]
-            depjs = 100*dep_JulSep_ave[gridID]
+            #depoj = 100*dep_OctJun_ave[gridID]
+            # 2023 Update -- SES 6/18/20 
+            depdj = 100*dep_DecJul_ave[gridID]
+            #depjs = 100*dep_JulSep_ave[gridID]
+            # 2023 Update -- SES 6/18/20
+            depan = 100*dep_AugNov_ave[gridID]
             swampfor = swfordict[gridID]
             fresh = frattdict[gridID]+ frfltdict[gridID]
             wat = waterdict[gridID]
             inter = interdict[gridID]
             brack = brackdict[gridID]
-            sand = pctsanddict[gridID]
+            #sand = pctsanddict[gridID] - 2023 Update -- SES 6/18/20 - set sand and S4 to dummy values not used and to delete at end
+            sand = 999
             
             if s <= 1.5:
                 S1 = 1
@@ -1594,42 +1723,46 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
             else:
                 S1 = 0.0
             
-            if depoj <= 0:
+            if depdj <= 0:
                 S2 = 0.0
-            elif depoj <= 46:
-                S2 = depoj/46.0
-            elif depoj <= 91:
+            elif depdj <= 46:
+                S2 = depdj/46.0
+            elif depdj <= 91:
                 S2 = 1.0
-            elif depoj <= 274:
-                S2 = 1.5 - 1.5*depoj/274.0
+            elif depdj <= 274:
+                S2 = 1.5 - 1.5*depdj/274.0
             else:
                 S2 = 0.0    
             
             S3= swampfor/100.0 + 0.85*fresh/100.0 + 0.75*wat/100. + 0.6*inter/100.0 + 0.2*brack/100.0
 
-            if sand >= 90:
-                S4 = 0.0
-            elif sand > 50:
-                S4 = 2.25-2.25*sand/50.0
-            else:
-                S4 = 1.0
+            #if sand >= 90:
+            #    S4 = 0.0
+            #elif sand > 50:
+            #    S4 = 2.25-2.25*sand/50.0
+            #else:
+            #    S4 = 1.0
+            S4=0.0
 
-            if depjs <= 0:
+            if depan <= 0:
                 S5 = 1.0
-            elif depjs <= 15:
-                S5 = 1.0 - depjs/15.0
+            elif depan <= 15:
+                S5 = 1.0 - depan/15.0
             else:
                 S5 = 0.0
 
-            HSI_CF = ((S1*S2)**(1./6.))*(S3**(1./3.))*((S4*S5)**(1./6.))
+            #HSI_CF = ((S1*S2)**(1./6.))*(S3**(1./3.))*((S4*S5)**(1./6.))
+            # 2023 Update -- SES 6/18/20 - took out sand and then removed variable from output file below 
+            HSI_CF = ((S1*S2)**(1./6.))*(S3**(1./3.))*(S5**(1./3.))
             
-            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_CF,s,depoj,depjs,swampfor,fresh,wat,inter,brack,sand) 
+            #writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_CF,s,depoj,depjs,swampfor,fresh,wat,inter,brack,sand)
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_CF,s,depdj,depan,swampfor,fresh,wat,inter,brack)
             fCF.write(writestring)
 
 # map crawfish HSI to Ascii grid
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
 
-    del(s,depoj,depjs,swampfor,fresh,wat,inter,brack,sand,S1,S2,S3,S4,S5,HSI_CF)
+    del(s,depdj,depan,swampfor,fresh,wat,inter,brack,sand,S1,S2,S3,S4,S5,HSI_CF)
     
 
 
@@ -1718,8 +1851,124 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,v
 
     del(pwat,deep,deprelmar,baldcyp,fresh,inter,brack,S1,S2,S3,S4,S5,S6)
     
+
+######################################
+##         SEASIDE SPARROW HSI      ##
+######################################
+# 2023 Update -- SES 6/30/20 added new HSI #    
+    print ' Calculating Seaside Sparrow HSI'
+
+    HSIcsv = r'%sSPARR.csv' % csv_outprefix
+    HSIasc = r'%sSPARR.asc' % asc_outprefix
+
+    with open(HSIcsv,'w') as fSp:
+      
+        headerstring = 'GridID,HSI,v1a,v1b,v1c,v2,elv\n'
+        fSp.write(headerstring)
+
+        for gridID in gridIDs:
+ #           w = waterdict[gridID]    # SES 6/30/20 did not set other v1_s from from report because all v1_s multiplied by 0.0        
+ #           v1a = frattdict[gridID]  # fresh attached marsh (V1e)
+ #           v1b = frfltdict[gridID]  # fresh floating marsh (V1d)
+            v1c = interdict[gridID]   # intermed marsh (V1c)
+            v1b = brackdict[gridID]  # brackish marsh (V1b)
+            v1a = salmardict[gridID] # saline marsh (V1a)
+ #           v1f = swfordict[gridID]  # swamp forest (V1g) (same as bottomland - LULC reclass doesn't differentiate between the two)
+ #           v1g = btfordict[gridID]  # bottomland forest (V1f) (same as swamp forest - LULC reclass doesn't differentiate between the two)
+
+            elv_aw = melevdict[gridID]   # Eric will have to create marsh elevation dictionanary and outputs for us - average marsh elevation in cm above water level
+
+            S1 = 1.0*(v1a/100.) + 0.7*(v1b/100.) + 0.3*(v1c/100.)   # divde by 100 to go from percent to proportion veg type for equation
+            
+#   why is btfordict added to wetlndict?  the equation is from fish hsis for percent marsh (wetland)
+            v2 =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))   # percent of cell that is wetland (includes floating marsh as of 6/30/20)
+
+            if v2 < 65.:                       
+                S2 = 0.0154*v2                                        
+            else:                       
+                S2 = 1.0
+
+            if elv_aw <= 0.09:   # if mean marsh elevation is less that +9 cm 
+                S3 = 0.0
+            elif elv_aw < 0.285
+                S3 = 5.025*elv_aw - 0.452
+            else:
+                S3 = 1.0
+
+            HSI_Spar = (S1*S2*S3)**(1./3.)
+            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_Spar,v1a,v1b,v1c,v2,elv_aw) 
+            fSp.write(writestring)
+
+# map sparrow HSI to Ascii grid
+    HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
+
+    del(v1a,v1b,v1c,elv,v2,S1,S2,S3)
     
-    
+######################################
+##         BALD EAGLE HSI           ##
+######################################
+# 2023 Update -- SES 6/30/20 added new HSI # 
+# Eric, Dave, and Shaye 7/2/20 - 36 km^2 grid cells - first try HSIs by grid cells and Eric will resample grid cell outputs for 36 km2 resolution 
+# algebraic hypothesis is mean is equal to mean of the means                      
+    print ' Calculating Bald Eagle HSI'
+
+    HSIcsv = r'%sEAGLE.csv' % csv_outprefix
+    HSIasc = r'%sEAGLE.asc' % asc_outprefix
+
+    with open(HSIcsv,'w') as fSp:
+      
+        headerstring = 'GridID,HSI,wat,v1a,v1b,v1c,v1d,v1e,v1f,frst\n'
+        fSp.write(headerstring)
+
+        for gridID in gridIDs:         # Note for bald eagle all habitat types are expressed as percent cover of the cell
+            wat = waterdict[gridID]    # 2023 HSI calls for open water habitat - is this it?
+            v1a = baredict[gridID]     # 2023 HSI calls for upland/developed habitat???  I put bareground in as placeholder???
+            v1b = frattdict[gridID]    # fresh attached marsh 
+            v1c = frfltdict[gridID]   # fresh floating marsh (V1d)
+            v1d = interdict[gridID]   # intermed marsh (V1c)
+            v1e = swfordict[gridID]   # swamp forest (V1g) (same as bottomland - LULC reclass doesn't differentiate between the two)
+            v1f = btfordict[gridID]   # bottomland forest (V1f) (same as swamp forest - LULC reclass doesn't differentiate between the two)
+
+            frst = v1e + v1f          # bald eagele hsi wants percent cover of swamp or bottomland forest, so adding the two for total percent cover
+            
+      # for upland/developed habitat percent cover:
+           if v1a == 0.0:
+               S1 = 0.0
+           else:
+               S1 = 0.408 - 0.142*(1./v1a)
+
+     # for fresh marsh habitat percent cover
+          S2 = 0.370 + 0.070*v1b - 2.655e-3*(v1b)**2. + 3.691e-5*(v1b)**3. - 1.0701e-7*(v1b)**4.
+
+     # for fresh floating marsh
+          S3 = 0.282 + 0.047*v1c - 1.105e-3*(v1c)**2. - 1.101e-5*(v1c)**3. - 3.967e-8*(v1c)**4.
+
+     # for intermediate marsh
+          S4 = 0.263 - 9.406e-3*v1d + 5.432e-4*(v1d)**2. - 3.817e-6*(v1d)**3.
+
+     # for forested habitat
+          S5 = 0.015 + 0.048*frst - 1.178e-3*(frst)**2. + 1.366e-5*(frst)**3. -5.673e-8*(frst)**4.
+
+     # for open water --- Is this correct?  Looks like typo in "HSI models for ICM coding", so changed here
+          if wat == 0.0:
+             S6 = 0.01
+          else:
+             S6 = 0.985 - 0.105*(1./wat)
+            
+
+          if wat > 95.0:    # If open water comprises more than 95% of grid cell, HSI score is zero
+            HSI_Eag = 0.0
+          else:
+            HSI_Eag = [(S1)**0.0104 * (S3)**0.3715 * (S5)**0.4743 * (S2)**0.0330 * (S4)**0.0353 * (S6)**0.0669]**0.991
+            
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_Eag,wat,v1a,v1b,v1c,v1d,v1e,v1f,frst) 
+            fSp.write(writestring)
+
+# map eagle HSI to Ascii grid
+    HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
+
+    del(wat,v1a,v1b,v1c,v1d,v1e,v1f,frst,S1,S2,S3,S4,S5,S6)
+        
 ############################
 ##    Nitrogen Uptake     ##
 ############################
