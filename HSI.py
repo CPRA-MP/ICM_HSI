@@ -358,7 +358,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
                  if oysc => 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
                     S2 = 0.02*v2+0.5     
                  if savc => 20.:             
-                    S2 = 0.0008*v2+0.8
+                    S2 = 0.008*v2+0.8
              elif v2 <= 80.:
                 S2 = 1.0
              else:
@@ -421,8 +421,8 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
           zsctt = (t_1**2. - 535.99)/206.16
           
 
-            lnCPUE1 = 2.50 -0.25*zscs + 0.30*zsct - 0.04*zscss - 0.33*zsctt - 0.05*zscs*zsct
-            S1 = (e**lnCPUE1 - 1.)/14.30
+            CPUE1 = 2.50 -0.25*zscs + 0.30*zsct - 0.04*zscss - 0.33*zsctt - 0.05*zscs*zsct
+            S1 = CPUE1/14.30
 
             if S1 < 0.:          # if S1 is negative, set to 0.
                 S1 = 0.              
@@ -450,7 +450,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)            
     
     # delete temporary variables so they do not accidentally get used in other HSIs
-    del(s,s_1,t,t_1,dayv,v2,zscs,zscss,zsct,zsctt,lnCPUE1,S1,S2)
+    del(s,s_1,t,t_1,dayv,v2,zscs,zscss,zsct,zsctt,CPUE1,S1,S2)
 
 ########################################
 ##         Gulf Menhaden HSIs         ##
@@ -642,7 +642,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
                 if oysc => 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
                     S2s = 0.02*v2s+0.5     
                 if savc => 20.:             
-                    S2s = 0.0008*v2s+0.8
+                    S2s = 0.008*v2s+0.8
             elif v2s <= 80.:
                 S2s = 1.0
             else:
@@ -1014,8 +1014,12 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
         fWSS.write(headerstring1)         
         fWST.write(headerstring2)
                   
- 
-        for gridID in gridIDs:
+
+################################################
+##   Small Juvenile White Shrimp HSI - Seine  ##
+################################################
+
+         for gridID in gridIDs:
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
             ss = sal_JunDec_ave[gridID]    # SES 7/2/20 per meeting: truncate sal and temp to min and max predictor values from WQ SI memo (Ann H and Laura D)
             ss1 = ss
@@ -1031,10 +1035,6 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             savc = max(0.0,min(watsavdict[gridID],100.0))
             oysc = max(0.0,min(cultchdict[gridID],1.0))    # 2023 Update -- SES 7/1/20 Eric setting oyster cultch to mean oyster HSI for previous decade, calibration period for first decade
             dayvs = 266.46   # SES 7/2/20 set to mean julian date from WQ SI memo for information - not used
-
-################################################
-##   Small Juvenile White Shrimp HSI - Seine  ##
-################################################
 
     #   all predictor variables are converted to z-scores using mean, sd from glmms in WQ SI memo
           zscs = (ss1 - 10.69)/7.72
@@ -1055,7 +1055,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
                 if oysc => 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
                     S2s = 0.02*v2s+0.5     
                 if savc => 20.:             
-                    S2s = 0.0008*v2s+0.8
+                    S2s = 0.008*v2s+0.8
             elif v2s <= 80.:
                 S2s = 1.0
             else:
@@ -1933,15 +1933,15 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             
       # for upland/developed habitat percent cover:
            if v1a == 0.0:
-               S1 = 0.0
+               S1 = 0.01
            else:
                S1 = 0.408 - 0.142*(1./v1a)
 
      # for fresh marsh habitat percent cover
-          S2 = 0.370 + 0.070*v1b - 2.655e-3*(v1b)**2. + 3.691e-5*(v1b)**3. - 1.0701e-7*(v1b)**4.
+          S2 = 0.370 + 0.070*v1b - 2.655e-3*(v1b)**2. + 3.691e-5*(v1b)**3. - 1.701e-7*(v1b)**4.
 
      # for fresh floating marsh
-          S3 = 0.282 + 0.047*v1c - 1.105e-3*(v1c)**2. - 1.101e-5*(v1c)**3. - 3.967e-8*(v1c)**4.
+          S3 = 0.282 + 0.047*v1c + 1.105e-3*(v1c)**2. - 1.101e-5*(v1c)**3. - 3.967e-8*(v1c)**4.
 
      # for intermediate marsh
           S4 = 0.263 - 9.406e-3*v1d + 5.432e-4*(v1d)**2. - 3.817e-6*(v1d)**3.
@@ -1949,7 +1949,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
      # for forested habitat
           S5 = 0.015 + 0.048*frst - 1.178e-3*(frst)**2. + 1.366e-5*(frst)**3. -5.673e-8*(frst)**4.
 
-     # for open water --- Is this correct?  Looks like typo in "HSI models for ICM coding", so changed here
+     # for open water
           if wat == 0.0:
              S6 = 0.01
           else:
