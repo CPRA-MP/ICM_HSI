@@ -64,7 +64,15 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
     ascii_grid_lookup = np.genfromtxt(grid_ascii_file,delimiter=' ',skiprows=6)
     ascii_header='nrows %s \nncols %s \nyllcorner %s \nxllcorner %s \ncellsize 500.0 \nnodata_value -9999.00' % (n500rows,n500cols,yll500,xll500)
-    
+
+ #    print ' Reading in cultch map for Oyster HSI'
+
+ # 2023 Update - SES 6/18/20 commented out cultch inputs, setting cultch and just left S1=1.0 for the HSI equation.  No longer using cultch variable in HSI.   
+ #   cultchdict = {}
+ #   cnp = np.genfromtxt('OysterCultch.csv',skip_header=True,usecols=(0,5),delimiter=',')
+ #   for row in cnp:
+ #       gid = row[0]
+ #       cultchdict[gid] = row[1]
     
     
 # generate some dictionaries from the Hydro output files - these combine the monthly output from hydro into mean values for various time frames (e.g. annual, April-July, etc)
@@ -299,8 +307,9 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     HSIcsv = r'%sBLUCJ.csv' % csv_outprefix
     HSIasc = r'%sBLUCJ.asc' % asc_outprefix
     
-
+    # 2023 Update -- SES 7/2/20 meet w/ Eric and Dave - Shaye update any sal, temp ranges and then Eric will read in gamm look-up table to overwrite S1, and delete at end
     # save input values that are only used in this HSI
+    # Eric please also write out lnCPUE1 from gamm look-up tables
     sal_JanMarAugDec_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
     tmp_JanMarAugDec_ave = dict((tmp[n-1],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
 
@@ -544,7 +553,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
         for gridID in gridIDs:
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
-            ss = sal_AprJul_ave[gridID]
+            ss = min(sal_AprJul_ave[gridID]                # DO THIS - truncate sal and temp to min and max predictor values from WQ SI memo
             ts = tmp_AprJul_ave[gridID]
             v2s =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
             savc = max(0.0,min(watsavdict[gridID],100.0))
@@ -555,6 +564,8 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ##############################################
 ##  Small Juvenile Brown Shrimp HSI - Seine ##
 ##############################################
+
+    
 
  #   all predictor variables are converted to z-scores using mean, sd from glmms in WQ SI memo
           zscs = (ss - 7.94)/7.07
@@ -570,7 +581,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
                 S1s = 0.
 
             if ss < 0. or ss > 33.:          # check if salinity or temp outside of model predicted ranges from WQ SI memo and if so, set S1s=-99.99 to flag
-                S1s = -99.99          
+                S1s = -99.99                 # we don't want to flag - we want to set out of range predictor variables to maximum and/or min values
 
             if ts < 12.91 or ts > 35.21:
                 S1s = -99.99
@@ -579,11 +590,11 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             if v2s < 25.:
                 S2s = 0.03*v2s+0.25
                 if oysc => 0.5:             # check these embedded if statements: if oyster HSI or sav cover greater than X then adjust increase S2s 
-                    S2s = 0.02*v2s+0.5
-                if savc => 0.2:
+                    S2s = 0.02*v2s+0.5      # three different functions for when v2s is less than 25.
+                if savc => 20.:             
                     S2s = 0.0008*v2s+0.8
             elif v2s <= 80.:
-                S2s = 1.
+                S2s = 1.0
             else:
                 S2s = 5.-0.05*v2s
 
@@ -648,17 +659,11 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ########################################
 ##        Eastern Oyster HSI          ##
 ########################################
-    print ' Reading in cultch map for Oyster HSI'
-
- # 2023 Update - SES 6/18/20 commented out cultch inputs, setting cultch and just left S1=1.0 for the HSI equation.  No longer using cultch variable in HSI.   
- #   cultchdict = {}
- #   cnp = np.genfromtxt('OysterCultch.csv',skip_header=True,usecols=(0,5),delimiter=',')
- #   for row in cnp:
- #       gid = row[0]
- #       cultchdict[gid] = row[1]
+   
  
  # 2023 Update - SES 6/18/20 added sedimentation dictionary (Eric will build) in same format as cultch input file
  # Note Eric will need to build us sediments.csv file from ICM outputs
+ # Eric: cumulative sediment accretion in mm per year by cell                      
     seddict = {}
     cnp = np.genfromtxt('sediments.csv',skip_header=True,usecols=(0,5),delimiter=',')
     for row in cnp:
@@ -1742,7 +1747,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
  #           v1f = swfordict[gridID]  # swamp forest (V1g) (same as bottomland - LULC reclass doesn't differentiate between the two)
  #           v1g = btfordict[gridID]  # bottomland forest (V1f) (same as swamp forest - LULC reclass doesn't differentiate between the two)
 
-            elv = melevdict[gridID]   # Eric will have to create marsh elevation dictionanary and outputs for us
+            elv_aw = melevdict[gridID]   # Eric will have to create marsh elevation dictionanary and outputs for us - average marsh elevation in cm above water level
 
             S1 = 1.0*(v1a/100.) + 0.7*(v1b/100.) + 0.3*(v1c/100.)   # divde by 100 to go from percent to proportion veg type for equation
             
@@ -1754,15 +1759,15 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             else:                       
                 S2 = 1.0
 
-            if elv <= 0.09:
+            if elv_aw <= 0.09:   # if mean marsh elevation is less that +9 cm 
                 S3 = 0.0
-            elif elv < 0.285
-                S3 = 5.025*elv - 0.452
+            elif elv_aw < 0.285
+                S3 = 5.025*elv_aw - 0.452
             else:
                 S3 = 1.0
 
             HSI_Spar = (S1*S2*S3)**(1./3.)
-            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_Spar,v1a,v1b,v1c,v2,elv) 
+            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_Spar,v1a,v1b,v1c,v2,elv_aw) 
             fSp.write(writestring)
 
 # map sparrow HSI to Ascii grid
@@ -1773,7 +1778,9 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ######################################
 ##         BALD EAGLE HSI           ##
 ######################################
-# 2023 Update -- SES 6/30/20 added new HSI #    
+# 2023 Update -- SES 6/30/20 added new HSI # 
+# Eric, Dave, and Shaye 7/2/20 - 36 km^2 grid cells - first try HSIs by grid cells and Eric will resample grid cell outputs for 36 km2 resolution 
+# algebraic hypothesis is mean is equal to mean of the means                      
     print ' Calculating Bald Eagle HSI'
 
     HSIcsv = r'%sEAGLE.csv' % csv_outprefix
