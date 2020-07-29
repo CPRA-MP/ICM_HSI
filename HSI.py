@@ -34,7 +34,7 @@ def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header
     
 #def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
 # 2023 Update -- SES 6/30/20 - removed ChlAdict, TSSdict and all variables becuase not used for 2023
-def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
+def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
     import numpy as np
     import os
     import csv
@@ -66,12 +66,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
  #    print( ' Reading in cultch map for Oyster HSI')
 
- # 2023 Update - SES 6/18/20 commented out cultch inputs for oysters and moved to front of program b/c Eric will create oyster HSI/dynamic cultch decadal maps that several HSIs will use   
- #   cultchdict = {}
- #   cnp = np.genfromtxt('OysterCultch.csv',skip_header=True,usecols=(0,5),delimiter=',')
- #   for row in cnp:
- #       gid = row[0]
- #       cultchdict[gid] = row[1]
+
     
     
 # generate some dictionaries from the Hydro output files - these combine the monthly output from hydro into mean values for various time frames (e.g. annual, April-July, etc)
@@ -1231,7 +1226,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (gridID,HSI_MotDuck,w,s,v1a,v1b,v1c,v1d,v1e,v1f,v1g,v2,v3a,v3b,v3c,v3d,v3e,v3f,v3g,v3h,v4)
             fMD.write(writestring)
 
-# map mottled duck HSI to Ascii grid
+    # map mottled duck HSI to Ascii grid
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
 
     # delete any dictionaries that aren't used in any other HSIs - frees up memory

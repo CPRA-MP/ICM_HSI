@@ -93,7 +93,6 @@ def compout2dict(input_file,import_column):
 
 import os
 import sys
-import exceptions
 import shutil
 import math
 import time
@@ -314,9 +313,36 @@ for year in range(startyear,endyear+1):
     pctedgedict = dict((pedge[n][0],pedge[n][1]) for n in range(0,n500grid))
     del(pedge)
     
+    # find year to use for cultch map, cultch map will be re-built and updated at the start of each decade
+    if elapsed_year < 11:
+        oyr2use = 1
+    elif elapsed_year < 21:
+        oyr2use = 11
+    elif elapsed_year < 31:
+        oyr2use = 21
+    elif elapsed_year < 41:
+        oyr2use = 31
+    else:
+        oyr2use = 41
+   
+#   # if new decade then build new Cultch map from previous oyster HSI outputs
+#   if elapsed_year in [11,21,31,41]:
+#       for oyr in range(elapsed_year-10,elapsed_year):
+#       
+#       BUILD SCRIPT TO AVERAGE OYSTER HSI OUTPUTS INTO CULTCH MAP FOR DECADE
+        
+    # generate cultch surface from pre-existing Cultch map file for the year
+    # this dictionary will be saved in memory and will only be updated if a new map is generated for the decade
+    if elapsed_year in 1[,11,21,31,41]:
+        cultch_file = os.path.normpath(r'%s\\OysterCultch_%02d.csv'% (HSI_dir,oyr2use))
+        cultchdict = {}
+        cnp = np.genfromtxt(cultch_file,skip_header=True,usecols=(0,5),delimiter=',')
+        for row in cnp:
+            gid = row[0]
+            cultchdict[gid] = row[1]
     
     try:
-        HSI.HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix)
+        HSI.HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix)
     except:
         print '******ERROR******'
         print '\n HSI model run failed - Year %s.' % year
