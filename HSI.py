@@ -1,9 +1,9 @@
 def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header):
     import numpy as np
     import arcpy
-    print ' - mapping HSI to ASCII grid'    
+    print(' - mapping HSI to ASCII grid')    
 # read HSI csv file into numpy array - usecol = column of csv file that has HSI value
-    newHSI = np.genfromtxt(HSIcsv,delimiter=',',usecols=[0,1],skiprows=1)
+    newHSI = np.genfromtxt(HSIcsv,delimiter=',',usecols=[0,1],  skip_header=1)
     newHSIdict = dict((newHSI[n][0],newHSI[n][1])for n in range(0,len(newHSI)))
     # prepare zero array in same shape of original Veg output ASCII grid
     newHSIgrid=np.zeros([n500rows,n500cols])
@@ -24,7 +24,7 @@ def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header
                         newHSIgrid[m][n] = newHSIval
                 except:   # if cellID is not a key in the newLULCdictionay - assign cell to NoData
                     newHSIgrid[m][n] = -9999
-    print " - saving new HSI ASCII raster file"
+    print( " - saving new HSI ASCII raster file")
     # save formatted LULC grid to ascii file with appropriate ASCII raster header
     np.savetxt(HSIasc,newHSIgrid,fmt='%.2f',delimiter=' ',header=ascii_header,comments='')
     
@@ -42,7 +42,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     import code
 
 # set some general variables
-    print ' Setting up HSI runs.'
+    print( ' Setting up HSI runs.')
 
     asc_outprefix = r'%s\\output_%02d\\Deliverables\\%s_O_%02d_%02d_X_' % (wetland_morph_dir,elapsedyear,runprefix,elapsedyear,elapsedyear)
     csv_outprefix = r'%s\\%s_O_%02d_%02d_X_' % (HSI_dir,runprefix,elapsedyear,elapsedyear)
@@ -60,12 +60,12 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 #    veg_ascii_grid = WM_params[61].lstrip().rstrip()
 #    veg_grid_ascii_file = os.path.normpath(vegetation_dir + '\\' + veg_ascii_grid)    
     grid_ascii_file = os.path.normpath(HSI_dir + '\\hsi_grid_ecoregion.asc')    
-    print ' Reading in ASCII grid template.'
+    print( ' Reading in ASCII grid template.')
 
-    ascii_grid_lookup = np.genfromtxt(grid_ascii_file,delimiter=' ',skiprows=6)
+    ascii_grid_lookup = np.genfromtxt(grid_ascii_file,delimiter=' ',  skip_header=6)
     ascii_header='nrows %s \nncols %s \nyllcorner %s \nxllcorner %s \ncellsize 500.0 \nnodata_value -9999.00' % (n500rows,n500cols,yll500,xll500)
 
- #    print ' Reading in cultch map for Oyster HSI'
+ #    print( ' Reading in cultch map for Oyster HSI')
 
  # 2023 Update - SES 6/18/20 commented out cultch inputs for oysters and moved to front of program b/c Eric will create oyster HSI/dynamic cultch decadal maps that several HSIs will use   
  #   cultchdict = {}
@@ -93,7 +93,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     
     
 # read in Veg output file - this is the same code that is used in WM.ImportVegResults()
-    print ' Reading in LAVegMod output files to be used for HSIs.'
+    print( ' Reading in LAVegMod output files to be used for HSIs.')
         
     # skipvalue is the number of rows contained in the header and the grid array located at the start of the Veg output file
     skipvalue = n500rows + 7
@@ -127,8 +127,8 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
                     new_veg[nn,nnn] = 0.0
                 veg_missing += 1
     if (veg_missing > 0):
-        print ( ' Some Vegetation output was not written correctly to Veg output file.')
-        print ('  - %s 500m grid cells did not have complete results in Veg Output file.' % veg_missing)
+        print( ' Some Vegetation output was not written correctly to Veg output file.')
+        print('  - %s 500m grid cells did not have complete results in Veg Output file.' % veg_missing)
     
     # read lookup table into dictionary that converts output VegType to new LULC value
     LULC_Lookup = r'%s\\%s' % (wetland_morph_dir,WM_params[32].lstrip().rstrip())           #this is the same code as in WM.main()
@@ -147,7 +147,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             else:
                 VegLULC_lookup[row.split(',')[old].rstrip().lstrip()]=row.split(',')[new].rstrip().lstrip()    
 
-    print ' Reclassifying Veg species output into general LULC types used by HSI equations.'
+    print( ' Reclassifying Veg species output into general LULC types used by HSI equations.')
 # generate some blank dictionaries that will be filled with Veg output
     waterdict = {}    # Update 2023 turned waterdict back on b/c bald eagle uses "open water" habitat
     wetlndict = {}
@@ -302,7 +302,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
    ########################################
     ##       Juvenile Blue Crab HSI       ##
     ########################################
-    print ' Calculating Blue Crab HSI'
+    print( ' Calculating Blue Crab HSI')
     
     HSIcsv = r'%sBLUCJ.csv' % csv_outprefix
     HSIasc = r'%sBLUCJ.asc' % asc_outprefix
@@ -378,7 +378,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     ########################################
     ##        Largemouth Bass HSI         ##
     ########################################
-    print ' Calculating Largemouth Bass HSI'
+    print( ' Calculating Largemouth Bass HSI')
     
   # 2023 Update -- SES 7/2/20 lots updated so just deleted or wrote over most old code
   
@@ -457,7 +457,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ########################################
 ##      Juvenile Gulf Menhaden HSI    ##
 ########################################
-    print ' Calculating Juvenile and Adult Gulf Menhaden HSIs'
+    print( ' Calculating Juvenile and Adult Gulf Menhaden HSIs')
 # save input values that are only used in this HSI
 # 2023 Update -- SES 7/2/20 changed the months to match the WQ SI Memo 
     sal_JanAug_ave = dict((sal[n],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
@@ -577,7 +577,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ##          Brown Shrimp HSIs               ##
 ##############################################
 
-    print ' Calculating Brown Shrimp HSIs'
+    print( ' Calculating Brown Shrimp HSIs')
 # save input values that are only used in this HSI
 # 2023 Update -- SES 6/27/20 updated a good bit of brown shrimp models, removed or wrote over old code
 # do not load sal_AprJul_ave because loaded up top for multiple species HSIs
@@ -724,7 +724,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
         gid = row[0]
         seddict[gid] = row[1]
 
-    print ' Calculating Eastern Oyster HSI'
+    print( ' Calculating Eastern Oyster HSI')
 # save input values that are only used in this HSI
 #    sal_JanDec_min = dict((sal[n],min(saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec])) for n in range(1,n500grid+1))
 # 2023 Update -- SES 6/18/20 minimum monthly salinity changed to minimum_AprSept and min_OctMar
@@ -874,7 +874,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ########################################
 ##    Juvenile Spotted Seatrout HSI   ##
 ########################################
-    print ' Calculating Juvenile and Adult Spotted Seatrout HSIs'
+    print( ' Calculating Juvenile and Adult Spotted Seatrout HSIs')
 # save input values that are only used in this HSI
     sal_SepNov_ave = dict((sal[n],np.mean([saldict[n][sep],saldict[n][octb],saldict[n][nov]]))for n in range(1,n500grid+1))
     tmp_SepNov_ave = dict((tmp[n],np.mean([tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov]]))for n in range(1,n500grid+1))
@@ -992,7 +992,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ##          White Shrimp HSIs         ##
 ########################################
 
-    print ' Calculating White Shrimp HSIs'
+    print( ' Calculating White Shrimp HSIs')
 # save input values that are only used in this HSI
 # 2023 Update -- SES 7/2/20 lots of white shrimp updates so just deleting or overwriting most of the old code
     sal_JunDec_ave = dict((sal[n],np.mean([saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
@@ -1129,7 +1129,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ##         MOTTLED DUCK HSI         ##
 ######################################
 # This HSI assumes is coded based on the depth tables generated by WM.HSIreclass provide depth in centimeters
-    print ' Converting Mottled Duck Depth DBF to CSV file.'
+    print( ' Converting Mottled Duck Depth DBF to CSV file.')
     MotDuckDepDBF = os.path.normpath("%s\\MotDuckDepths_cm.dbf" % HSI_dir) # must match name of file set in WM.HSIreclass
     MotDuckCSV = os.path.normpath("%s\\MotDuckDepths_cm_%s.csv" % (HSI_dir,year))
     
@@ -1144,11 +1144,11 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             ocsv.writerow(rec.fieldData)
         idb.close()
     
-    print ' - removing DBF file.'
+    print( ' - removing DBF file.')
     os.remove(MotDuckDepDBF)
     
-    print ' Calculating Mottled Duck HSI'
-    MotDuck = np.genfromtxt(MotDuckCSV,delimiter = ',',skiprows = 1)
+    print( ' Calculating Mottled Duck HSI')
+    MotDuck = np.genfromtxt(MotDuckCSV,delimiter = ',',  skip_header = 1)
     MotDuckDepdict = {}
     MDDdict ={}
     MDDmissing = [0,0,0,0,0,0,0,0,0]        # values to assign to grid cells with no GridID key in depth dictionary
@@ -1261,7 +1261,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ##           GADWALL HSI            ##
 ######################################
 # This HSI assumes is coded based on the depth tables generated by WM.HSIreclass provide depth in centimeters
-    print ' Converting Gadwall Depth DBF to CSV file.'
+    print( ' Converting Gadwall Depth DBF to CSV file.')
     GadwallDepDBF = os.path.normpath("%s\\GadwallDepths_cm.dbf" % HSI_dir) # must match name of file set in WM.HSIreclass
     GadwallCSV = os.path.normpath("%s\\GadwallDepths_cm_%s.csv" % (HSI_dir,year))
     
@@ -1276,11 +1276,11 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             ocsv.writerow(rec.fieldData)
         idb.close()
     
-    print ' - removing DBF file.'
+    print( ' - removing DBF file.')
     os.remove(GadwallDepDBF)
     
-    print ' Calculating Gadwall HSI'
-    Gadwall = np.genfromtxt(GadwallCSV,delimiter = ',',skiprows = 1)
+    print( ' Calculating Gadwall HSI')
+    Gadwall = np.genfromtxt(GadwallCSV,delimiter = ',',  skip_header = 1)
     GadwallDepdict = {}
     GDdict ={}
     GDmissing = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]        # values to assign to grid cells with no GridID key in depth dictionary
@@ -1393,7 +1393,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ##       GREEN-WINGED TEAL HSI      ##
 ######################################
 # This HSI assumes is coded based on the depth tables generated by WM.HSIreclass provide depth in centimeters
-    print ' Converting Green-winged Teal depth DBF to CSV file.'
+    print( ' Converting Green-winged Teal depth DBF to CSV file.')
     GWTealDepDBF = os.path.normpath("%s\\GWTealDepths_cm.dbf" % HSI_dir) # must match name of file set in WM.HSIreclass
     GWTealCSV = os.path.normpath("%s\\GWTealDepths_cm_%s.csv" % (HSI_dir,year)) 
     
@@ -1408,11 +1408,11 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             ocsv.writerow(rec.fieldData)
         idb.close()
     
-    print ' - removing DBF file.'
+    print( ' - removing DBF file.')
     os.remove(GWTealDepDBF)
     
-    print ' Calculating Green-winged Teal HSI'
-    GWTeal = np.genfromtxt(GWTealCSV,delimiter = ',',skiprows = 1)
+    print( ' Calculating Green-winged Teal HSI')
+    GWTeal = np.genfromtxt(GWTealCSV,delimiter = ',',  skip_header = 1)
     GWTealDepdict = {}
     GTDdict ={}
     GTDmissing = [0,0,0,0,0,0,0,0,0]        # values to assign to grid cells with no GridID key in depth dictionary
@@ -1516,7 +1516,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ######################################
 ##         BROWN PELICAN HSI        ##
 ######################################
-    print ' Calculating Brown Pelican HSI'
+    print( ' Calculating Brown Pelican HSI')
 
 
     HSIcsv = r'%sBRWNP_noGMENA.csv' % csv_outprefix
@@ -1526,7 +1526,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     HSIasc2 = r'%sBRWNP.asc' % asc_outprefix
     
     bpel_input_file = 'BrownPelican_HSI_inputs_%02d.csv' % elapsedyear 
-    BP_inputs = np.genfromtxt(bpel_input_file,skiprows=1,delimiter=',')
+    BP_inputs = np.genfromtxt(bpel_input_file,  skip_header=1,delimiter=',')
     
     distancemultiplier = {}
     saltmarsh_islandarea_m2 = {}
@@ -1619,7 +1619,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 # map pelican HSI to Ascii grid without Menhaden habitat values
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
     
-    print ' Re-calculating Brown Pelican HSI with Menhaden'
+    print( ' Re-calculating Brown Pelican HSI with Menhaden')
     
     with open(HSIcsv2,'w') as fBP2:
         
@@ -1628,8 +1628,8 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
         menhaden_asci = r'%sGMENA.asc' % asc_outprefix
         
-        men = np.genfromtxt(menhaden_asci,delimiter=" ",skiprows=6)
-        pelcsv = np.genfromtxt(HSIcsv,delimiter=",",skiprows=1)
+        men = np.genfromtxt(menhaden_asci,delimiter=" ",  skip_header=6)
+        pelcsv = np.genfromtxt(HSIcsv,delimiter=",",  skip_header=1)
         peldict = dict((pelcsv[n][0],pelcsv[n][1:7])for n in range(0,len(pelcsv)))
 
         newHSIgrid = np.zeros([n500rows,n500cols])
@@ -1683,7 +1683,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ##      CRAWFISH HSI      ##
 ############################
 #   sal_OctJun_ave = dict((sal[n],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][octb],saldict[n][nov],saldict[n][dec]))for n in range(1,n500grid+1))
-    print ('Calculating Crawfish HSI.')
+    print( 'Calculating Crawfish HSI.')
     # 2023 Update - SES 6/18/20 - saving new inputs for just this HSI - this changed from 2017 so old inputs are still saved above (dep_OctJun_ave[gridID] and dep_JulSep_ave[gridID])
     dep_DecJul_ave = dict((dept[n],np.mean([depthdict[n][jan],depthdict[n][feb],depthdict[n][mar],depthdict[n][apr],depthdict[n][may],depthdict[n][jun],depthdict[n][jul],depthdict[n][dec]]))for n in range(1,n500grid+1))
     dep_AugNov_ave = dict((dept[n],np.mean([depthdict[n][aug],depthdict[n][sep],depthdict[n][octb],depthdic[n][nov]]))for n in range(1,n500grid+1))
@@ -1771,7 +1771,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ############################
 ##     ALLIGATOR HSI      ##
 ############################
-    print ('Calculating Alligator HSI.')
+    print( 'Calculating Alligator HSI.')
     
     
     HSIcsv = r'%sALLIG.csv' % csv_outprefix
@@ -1856,7 +1856,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ##         SEASIDE SPARROW HSI      ##
 ######################################
 # 2023 Update -- SES 6/30/20 added new HSI #    
-    print ' Calculating Seaside Sparrow HSI'
+    print( ' Calculating Seaside Sparrow HSI')
 
     HSIcsv = r'%sSPARR.csv' % csv_outprefix
     HSIasc = r'%sSPARR.asc' % asc_outprefix
@@ -1910,7 +1910,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 # 2023 Update -- SES 6/30/20 added new HSI # 
 # Eric, Dave, and Shaye 7/2/20 - 36 km^2 grid cells - first try HSIs by grid cells and Eric will resample grid cell outputs for 36 km2 resolution 
 # algebraic hypothesis is mean is equal to mean of the means                      
-    print ' Calculating Bald Eagle HSI'
+    print( ' Calculating Bald Eagle HSI')
 
     HSIcsv = r'%sEAGLE.csv' % csv_outprefix
     HSIasc = r'%sEAGLE.asc' % asc_outprefix
@@ -1972,7 +1972,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ############################
 ##    Nitrogen Uptake     ##
 ############################
-    print ' Calculating Nitrogen Uptake'
+    print( ' Calculating Nitrogen Uptake')
 
     BLH_Dn = 491.1
     Swampforest_Dn = 288.7
