@@ -268,15 +268,12 @@ for year in range(startyear,endyear+1):
     # value will be an array of 12 monthly values
     saldict = {}
     tmpdict = {}
-    tssdict = {}
-    ChlAdict = {}
+
     
     for n in grid_comp.keys():
         saldict[n] = []
         tmpdict[n] = []
-        tssdict[n] = []
-        ChlAdict[n]  =[]
-        
+
     # calculate monthly averages for compartment
     print(' calculating monthly averages of ICM-Hydro output for import into HSI.py')
     for mon in range(1,13):
@@ -305,30 +302,6 @@ for year in range(startyear,endyear+1):
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
         for n in grid_comp.keys():
             tmpdict[n].append(mon_ave[n])
-    
-        ##############
-        # TSS 
-        ##############
-        # read in daily TSSand calculate monthly mean for compartment then map to grid using daily2ave and comp2grid functions
-        daily_timeseries_file = os.path.normpath(r'%s\\TSS.out' % ecohydro_dir)
-        comp_month_ave_dict = daily2ave(data_start,ave_start,ave_end,daily_timeseries_file,ndays_run)
-        mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
-        # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
-        for n in grid_comp.keys():
-            tssdict[n].append(mon_ave[n])
-    
-        ##########################
-        # TKN as a proxy for ChlA
-        ##########################
-        # read in daily TKN and calculate monthly mean for compartment then map to grid using daily2ave and comp2grid functions
-        daily_timeseries_file = os.path.normpath(r'%s\\TKN.out' % ecohydro_dir)
-        comp_month_ave_dict = daily2ave(data_start,ave_start,ave_end,daily_timeseries_file,ndays_run)
-        mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
-        # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
-        for n in grid_comp.keys():
-            ChlAdict[n].append(mon_ave[n])        
-
-
 
 
 
@@ -343,7 +316,7 @@ for year in range(startyear,endyear+1):
     
     
     try:
-        HSI.HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix)
+        HSI.HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix)
     except:
         print '******ERROR******'
         print '\n HSI model run failed - Year %s.' % year

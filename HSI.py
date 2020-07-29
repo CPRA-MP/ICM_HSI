@@ -34,7 +34,7 @@ def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header
     
 #def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
 # 2023 Update -- SES 6/30/20 - removed ChlAdict, TSSdict and all variables becuase not used for 2023
-def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
+def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
     import numpy as np
     from dbfpy import dbf
     import os
@@ -78,18 +78,18 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 # generate some dictionaries from the Hydro output files - these combine the monthly output from hydro into mean values for various time frames (e.g. annual, April-July, etc)
 # other input values that are used by specific HSIs will be written and deleted within the respective HSIs to minimize memory requirements
 # GridIDs from Ecohydro output file - this could be in a different order than n500grid, so use it as the dictionary key
-#    ChlA_JanDec_ave = dict( (ChlA[n-1],1000.0*np.mean([ChlAdict[n][jan],ChlAdict[n][feb],ChlAdict[n][mar],ChlAdict[n][apr],ChlAdict[n][may],ChlAdict[n][jun],ChlAdict[n][jul],ChlAdict[n][aug],ChlAdict[n][sep],ChlAdict[n][octb],ChlAdict[n][nov],ChlAdict[n][dec]])) for n in range(1,n500grid+1))
-    sal_JanDec_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
-    tmp_JanDec_ave = dict((tmp[n-1],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
-    sal_AprJul_ave = dict((sal[n-1],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
-    dep_JanDec_ave = dict((dept[n-1],depthdict[n][1])for n in range(1,n500grid+1))
-    dep_JulSep_ave = dict((dept[n-1],depthdict[n][0]) for n in range(1,n500grid+1)) #this is summertime depth value from hydro output
-    dep_OctJun_ave = dict((dept[n-1],(0.2*depthdict[n][0]+0.8*depthdict[n][1])) for n in range(1,n500grid+1))
+#    ChlA_JanDec_ave = dict( (ChlA[n],1000.0*np.mean([ChlAdict[n][jan],ChlAdict[n][feb],ChlAdict[n][mar],ChlAdict[n][apr],ChlAdict[n][may],ChlAdict[n][jun],ChlAdict[n][jul],ChlAdict[n][aug],ChlAdict[n][sep],ChlAdict[n][octb],ChlAdict[n][nov],ChlAdict[n][dec]])) for n in range(1,n500grid+1))
+    sal_JanDec_ave = dict((sal[n],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
+    tmp_JanDec_ave = dict((tmp[n],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
+    sal_AprJul_ave = dict((sal[n],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
+    dep_JanDec_ave = dict((dept[n],depthdict[n][1])for n in range(1,n500grid+1))
+    dep_JulSep_ave = dict((dept[n],depthdict[n][0]) for n in range(1,n500grid+1)) #this is summertime depth value from hydro output
+    dep_OctJun_ave = dict((dept[n],(0.2*depthdict[n][0]+0.8*depthdict[n][1])) for n in range(1,n500grid+1))
 
     
-    #dep_JanDec_ave = dict((dept[n-1],np.mean([depthdict[n][jan],depthdict[n][feb],depthdict[n][mar],depthdict[n][apr],depthdict[n][may],depthdict[n][jun],depthdict[n][jul],depthdict[n][aug],depthdict[n][sep],depthdict[n][octb],depthdict[n][nov],depthdict[n][dec]]))for n in range(1,n500grid+1))
-    #dep_OctJun_ave = dict((dept[n-1],np.mean([depthdict[n][jan],depthdict[n][feb],depthdict[n][mar],depthdict[n][apr],depthdict[n][may],depthdict[n][jun],depthdict[n][octb],depthdict[n][nov],depthdict[n][dec]]))for n in range(1,n500grid+1))
-    #dep_JulSep_ave = dict((dept[n-1],np.mean([depthdict[n][jul],depthdict[n][aug],depthdict[n][sep]]))for n in range(1,n500grid+1))
+    #dep_JanDec_ave = dict((dept[n],np.mean([depthdict[n][jan],depthdict[n][feb],depthdict[n][mar],depthdict[n][apr],depthdict[n][may],depthdict[n][jun],depthdict[n][jul],depthdict[n][aug],depthdict[n][sep],depthdict[n][octb],depthdict[n][nov],depthdict[n][dec]]))for n in range(1,n500grid+1))
+    #dep_OctJun_ave = dict((dept[n],np.mean([depthdict[n][jan],depthdict[n][feb],depthdict[n][mar],depthdict[n][apr],depthdict[n][may],depthdict[n][jun],depthdict[n][octb],depthdict[n][nov],depthdict[n][dec]]))for n in range(1,n500grid+1))
+    #dep_JulSep_ave = dict((dept[n],np.mean([depthdict[n][jul],depthdict[n][aug],depthdict[n][sep]]))for n in range(1,n500grid+1))
     
     
 # read in Veg output file - this is the same code that is used in WM.ImportVegResults()
@@ -311,8 +311,8 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     # save input values that are only used in this HSI
     # Eric please also write out lnCPUE1 from gamm look-up tables
     # commented out below because blue crab WQ SI update uses all months, and all months/full year average set above
-    #sal_JanMarAugDec_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
-    #tmp_JanMarAugDec_ave = dict((tmp[n-1],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
+    #sal_JanMarAugDec_ave = dict((sal[n],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
+    #tmp_JanMarAugDec_ave = dict((tmp[n],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
 
     with open(HSIcsv,'w') as fBC:
         
@@ -460,10 +460,10 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     print ' Calculating Juvenile and Adult Gulf Menhaden HSIs'
 # save input values that are only used in this HSI
 # 2023 Update -- SES 7/2/20 changed the months to match the WQ SI Memo 
-    sal_JanAug_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
-    tmp_JanAug_ave = dict((tmp[n-1],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul]]))for n in range(1,n500grid+1))
-    sal_MarNov_ave = dict((sal[n-1],np.mean([saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb]]))for n in range(1,n500grid+1))
-    tmp_MarNOv_ave = dict((tmp[n-1],np.mean([tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb]]))for n in range(1,n500grid+1))
+    sal_JanAug_ave = dict((sal[n],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
+    tmp_JanAug_ave = dict((tmp[n],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul]]))for n in range(1,n500grid+1))
+    sal_MarNov_ave = dict((sal[n],np.mean([saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb]]))for n in range(1,n500grid+1))
+    tmp_MarNOv_ave = dict((tmp[n],np.mean([tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb]]))for n in range(1,n500grid+1))
 
     HSIcsv = r'%sGMENJ.csv' % csv_outprefix
     HSIasc = r'%sGMENJ.asc' % asc_outprefix
@@ -581,8 +581,8 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 # save input values that are only used in this HSI
 # 2023 Update -- SES 6/27/20 updated a good bit of brown shrimp models, removed or wrote over old code
 # do not load sal_AprJul_ave because loaded up top for multiple species HSIs
-#    sal_AprJul_ave = dict((sal[n-1],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
-    tmp_AprJul_ave = dict((tmp[n-1],np.mean([tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul]]))for n in range(1,n500grid+1))
+#    sal_AprJul_ave = dict((sal[n],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
+    tmp_AprJul_ave = dict((tmp[n],np.mean([tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul]]))for n in range(1,n500grid+1))
 
     HSIcsv = r'%sBSHRS.csv' % csv_outprefix
     HSIasc = r'%sBSHRS.asc' % asc_outprefix
@@ -726,13 +726,13 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
     print ' Calculating Eastern Oyster HSI'
 # save input values that are only used in this HSI
-#    sal_JanDec_min = dict((sal[n-1],min(saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec])) for n in range(1,n500grid+1))
+#    sal_JanDec_min = dict((sal[n],min(saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec])) for n in range(1,n500grid+1))
 # 2023 Update -- SES 6/18/20 minimum monthly salinity changed to minimum_AprSept and min_OctMar
-    sal_AprSep_min = dict((sal[n-1],min(saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep])) for n in range(1,n500grid+1))
-    sal_OctMar_min = dict((sal[n-1],min(saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][octb],saldict[n][nov],saldict[n][dec])) for n in range(1,n500grid+1))
-#    sal_MaySep_ave = dict((sal[n-1],np.mean([saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep]]))for n in range(1,n500grid+1))
+    sal_AprSep_min = dict((sal[n],min(saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep])) for n in range(1,n500grid+1))
+    sal_OctMar_min = dict((sal[n],min(saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][octb],saldict[n][nov],saldict[n][dec])) for n in range(1,n500grid+1))
+#    sal_MaySep_ave = dict((sal[n],np.mean([saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep]]))for n in range(1,n500grid+1))
 # 2023 Update -- SES 6/18/20 expanded mean spawning salinity from April-November
-    sal_AprNov_ave = dict((sal[n-1],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov]]))for n in range(1,n500grid+1))
+    sal_AprNov_ave = dict((sal[n],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov]]))for n in range(1,n500grid+1))
    
     HSIcsv = r'%sOYSTE.csv' % csv_outprefix
     HSIasc = r'%sOYSTE.asc' % asc_outprefix
@@ -876,8 +876,8 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ########################################
     print ' Calculating Juvenile and Adult Spotted Seatrout HSIs'
 # save input values that are only used in this HSI
-    sal_SepNov_ave = dict((sal[n-1],np.mean([saldict[n][sep],saldict[n][octb],saldict[n][nov]]))for n in range(1,n500grid+1))
-    tmp_SepNov_ave = dict((tmp[n-1],np.mean([tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov]]))for n in range(1,n500grid+1))
+    sal_SepNov_ave = dict((sal[n],np.mean([saldict[n][sep],saldict[n][octb],saldict[n][nov]]))for n in range(1,n500grid+1))
+    tmp_SepNov_ave = dict((tmp[n],np.mean([tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov]]))for n in range(1,n500grid+1))
 
     HSIcsv = r'%sSPSTJ.csv' % csv_outprefix
     HSIasc = r'%sSPSTJ.asc' % asc_outprefix
@@ -995,11 +995,11 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     print ' Calculating White Shrimp HSIs'
 # save input values that are only used in this HSI
 # 2023 Update -- SES 7/2/20 lots of white shrimp updates so just deleting or overwriting most of the old code
-    sal_JunDec_ave = dict((sal[n-1],np.mean([saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
-    tmp_JunDec_ave = dict((tmp[n-1],np.mean([tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
+    sal_JunDec_ave = dict((sal[n],np.mean([saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
+    tmp_JunDec_ave = dict((tmp[n],np.mean([tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
 # 2023 Update - SES 7/2/20 changed white shrimp trawl to entire year, and sal and temp set for entire year in top of code for multiple species
-#    sal_JulOct_ave = dict((sal[n-1],np.mean([saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb]]))for n in range(1,n500grid+1))
-#    tmp_JulOct_ave = dict((tmp[n-1],np.mean([tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb]]))for n in range(1,n500grid+1))
+#    sal_JulOct_ave = dict((sal[n],np.mean([saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb]]))for n in range(1,n500grid+1))
+#    tmp_JulOct_ave = dict((tmp[n],np.mean([tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb]]))for n in range(1,n500grid+1))
     
     HSIcsv = r'%sWSHRS.csv' % csv_outprefix
     HSIasc = r'%sWSHRS.asc' % asc_outprefix
@@ -1682,11 +1682,11 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ############################
 ##      CRAWFISH HSI      ##
 ############################
-#   sal_OctJun_ave = dict((sal[n-1],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][octb],saldict[n][nov],saldict[n][dec]))for n in range(1,n500grid+1))
+#   sal_OctJun_ave = dict((sal[n],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][octb],saldict[n][nov],saldict[n][dec]))for n in range(1,n500grid+1))
     print ('Calculating Crawfish HSI.')
     # 2023 Update - SES 6/18/20 - saving new inputs for just this HSI - this changed from 2017 so old inputs are still saved above (dep_OctJun_ave[gridID] and dep_JulSep_ave[gridID])
-    dep_DecJul_ave = dict((dept[n-1],np.mean([depthdict[n][jan],depthdict[n][feb],depthdict[n][mar],depthdict[n][apr],depthdict[n][may],depthdict[n][jun],depthdict[n][jul],depthdict[n][dec]]))for n in range(1,n500grid+1))
-    dep_AugNov_ave = dict((dept[n-1],np.mean([depthdict[n][aug],depthdict[n][sep],depthdict[n][octb],depthdic[n][nov]]))for n in range(1,n500grid+1))
+    dep_DecJul_ave = dict((dept[n],np.mean([depthdict[n][jan],depthdict[n][feb],depthdict[n][mar],depthdict[n][apr],depthdict[n][may],depthdict[n][jun],depthdict[n][jul],depthdict[n][dec]]))for n in range(1,n500grid+1))
+    dep_AugNov_ave = dict((dept[n],np.mean([depthdict[n][aug],depthdict[n][sep],depthdict[n][octb],depthdic[n][nov]]))for n in range(1,n500grid+1))
     
     HSIcsv = r'%sCRAYF.csv' % csv_outprefix
     HSIasc = r'%sCRAYF.asc' % asc_outprefix
