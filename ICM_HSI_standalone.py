@@ -289,7 +289,7 @@ for year in range(startyear,endyear+1):
         mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
         for n in grid_comp.keys():
-            saldict[n].append(mon_ave[n])
+            saldict[n].append(round(mon_ave[n],1)) # this will save monthly mean to the tenths decimal #.# precision
     
         ##############
         # Temperature 
@@ -300,7 +300,7 @@ for year in range(startyear,endyear+1):
         mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
         for n in grid_comp.keys():
-            tmpdict[n].append(mon_ave[n])
+            tmpdict[n].append(round(mon_ave[n]),1)) # this will save monthly mean to the tenths decimal #.# precision
 
 
 

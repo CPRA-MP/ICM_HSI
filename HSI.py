@@ -298,6 +298,29 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     ########################################
     print( ' Calculating Blue Crab HSI')
     
+    
+    # read in GAMM lookup table for sal/temp combinations
+    blucj_gamm_seine = {}
+    blucj_seine_file = os.path.normpath(r'%s\seine_bluecrab_gamm_table' % HSI_dir)
+    gamm_table_delimiter = '\t' #','
+    with open(blucj_seine_file) as tf:
+        nline = 0
+        for line in tf: 
+            if nline > 0:
+                linesplit = line.split(gamm_table_delimiter)
+                s = linesplit[0]
+                t = linesplit[1]
+                cpue_sc = linesplit[6]
+                try:
+                    blucj_gamm_seine[s][t] = cpue_sc    # if sal is already a key in the gamm dictionary, add the temp as another key and save cpue as the value
+                except:
+                    blucj_gamm_seine[s] = {}            # if sal is not already a key in gamm dictionary, add sal as key and the value will be an empty dictionary
+                    blucj_gamm_seine[s][t] = cpue_sc    # popuplate dictionary with temp as key and cpue as value
+            nline +=1    
+                   
+
+    
+    
     HSIcsv = r'%sBLUCJ.csv' % csv_outprefix
     HSIasc = r'%sBLUCJ.asc' % asc_outprefix
     
@@ -310,7 +333,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
     with open(HSIcsv,'w') as fBC:
         
-        headerstring = 'GridID,HSI,s,t,v2,\n'
+        headerstring = 'gridID,HSIs,s_1,t,t_1,v2,oysc,savc,S1\n'
         fBC.write(headerstring)
 
         for gridID in gridIDs:
@@ -320,33 +343,20 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             t = tmp_JanDec_ave[gridID]
             v2 =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))   # I think we get rid of adding btfordict????
             savc = max(0.0,min(watsavdict[gridID],100.0))  
-            oysc = max(0.0,min(cultchdict[gridID],1.0))    # 2023 Update -- SES 7/1/20 Eric setting oyster cultch to mean oyster HSI per decade
+            oysc = max(0.0,min(cultchdict[gridID],1.0))
             dayv = 6.56
 
- # 2023 Update -- SES 7/2/20 - still set truncated s and t below for Eric to call lookup table based on s_1,t_1
-            s_1 = s
-            
-             if s > 36.8:
-              s_1 = 36.8
-
-            t_1 = t
-            
-             if t < 3.21:
-              t_1 = 3.21
-              
-             if t > 35.21:
-              t_1 = 35.21
-              
- # 7/2/20 commented out below for Eric to delete or overwrite old S1 with gamm look-up table           
- #           if s < 35.0:
- #               if t < 35.0:
- #                   lnCPUE1=0.8587-0.2451*dayv+0.07012*dayv**2.-0.03677*s+0.06561*t+0.000312*s**2.-0.00182*t**2.
- #                   S1 =(e**lnCPUE1 - 1.)/2.47
- #               else:
- #                   S1 = 0.0
- #           else:
- #               S1 = 0.0
-                
+            # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
+            s_1 = min(s,36.8)
+            t_1 = max(3.2,min(t,35.2))
+             
+            # use sal & temp to lookup scaled CPUE value from GAMM lookup table (imported above)
+            # if sal/temp combination does not exist in lookup table, set term to error flag which is used later to skip HSI calculation
+            try:
+                S1 = blucj_gamm_seine[round(s_1,1)][round(t_1,1)]        # this will lookup the scaled cpue value from the imported Menhaden seine GAMM lookup table that has precision to the tenths place #.#
+            except:
+                S1 = -9999 
+               
              if v2 < 25.:
                 S2 = 0.03*v2+0.25         # note three different functions for when v2s is less than 25.
                  if oysc => 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
@@ -357,11 +367,14 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
                 S2 = 1.0
              else:
                 S2 = max(0.0,(5.-0.05*v2))
-        
-            
-            HSI_juvBlueCrab = zero_mult*max(0.0,(S1*S2))**(1./2.)   # I left parentheses along here - guess it doesn't really matter, works either way
+    
+            # check for error in imported GAMM lookup table values - if sal/temp combination was not in table (or there is a precision mismatch), do not calculate HSI and report out error flag of -9999
+            if S1 == -9999:
+                HSI_juvBlueCrab = -9999
+            else:
+                HSI_juvBlueCrab = zero_mult*max(0.0,(S1*S2))**(1./2.)   # I left parentheses along here - guess it doesn't really matter, works either way
 
-            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_juvBlueCrab,s,s_1,t,t_1,v2,oysc,savc)
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_juvBlueCrab,s,s_1,t,t_1,v2,oysc,savc,S1)
             fBC.write(writestring)
     
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
@@ -449,8 +462,6 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ########################################
 ##         Gulf Menhaden HSIs         ##
 ########################################
-##      Juvenile Gulf Menhaden HSI    ##
-########################################
     print( ' Calculating Juvenile and Adult Gulf Menhaden HSIs')
 # save input values that are only used in this HSI
 # 2023 Update -- SES 7/2/20 changed the months to match the WQ SI Memo 
@@ -459,6 +470,26 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     sal_MarNov_ave = dict((sal[n],np.mean([saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb]]))for n in range(1,n500grid+1))
     tmp_MarNOv_ave = dict((tmp[n],np.mean([tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb]]))for n in range(1,n500grid+1))
 
+    # read in GAMM lookup table for sal/temp combinations
+    gmena_gamm_seine = {}
+    gmena_seine_file = os.path.normpath(r'%s\seine_gulfmenhaden_gamm_table.txt' % HSI_dir)
+    gamm_table_delimiter = '\t' #','
+    with open(gmena_seine_file) as tf:
+        nline = 0
+        for line in tf: 
+            if nline > 0:
+                linesplit = line.split(gamm_table_delimiter)
+                s = linesplit[0]
+                t = linesplit[1]
+                cpue_sc = linesplit[6]
+                try:
+                    gmena_gamm_seine[s][t] = cpue_sc    # if sal is already a key in the gamm dictionary, add the temp as another key and save cpue as the value
+                except:
+                    gmena_gamm_seine[s] = {}            # if sal is not already a key in gamm dictionary, add sal as key and the value will be an empty dictionary
+                    gmena_gamm_seine[s][t] = cpue_sc    # popuplate dictionary with temp as key and cpue as value
+            nline +=1    
+                   
+
     HSIcsv = r'%sGMENJ.csv' % csv_outprefix
     HSIasc = r'%sGMENJ.asc' % asc_outprefix
 
@@ -466,7 +497,9 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     HSIasc2 = r'%sGMENA.asc' % asc_outprefix
 
     with open(HSIcsv,'w') as fGMJ, open(HSIcsv2,'w') as fGMA:
-
+########################################
+##      Juvenile Gulf Menhaden HSI    ##
+########################################
         headerstring = 'GridID,HSI,s,s_1,t,t_1,v2\n'
         fGMJ.write(headerstring)
         fGMA.write(headerstring)
@@ -526,32 +559,30 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             v2a = v2j
             dayva = 1.8
 
-            sa_1 = sa
-            
-             if sa > 36.8:
-                 sa_1 = 36.8
-
-            ta_1 = ta
-
-             if ta < 6.7:
-                ta_1 = 6.7
-
-            if ta > 35.9:
-                ta_1 = 35.9
+            # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
+            sa_1 = min(sa,36.8)
+            ta_1 = max(6.7,min(ta,35.9))
+             
+            # use sal & temp to lookup scaled CPUE value from GAMM lookup table (imported above)
+            # if sal/temp combination does not exist in lookup table, set term to error flag which is used later to skip HSI calculation
+            try:
+                S1a = gmena_gamm_seine[round(sa_1,1)][round(ta_1,1)]        # this will lookup the scaled cpue value from the imported Menhaden seine GAMM lookup table that has precision to the tenths place #.#
+            except:
+                S1a = -9999
                 
- # replace below with GAMM look-up table for sa_1, ta_1           
- #           lnCPUE1a = -0.9567+0.3062*dayva-0.1123*dayva**2.+0.01829*sa+0.1109*ta-0.00018*sa**2.-0.00008*ta*sa**2.-0.00263*ta**2.+0.000112*sa*ta**2.
-
- #           S1a = (e**lnCPUE1a - 1.)/5.81
-
             if v2a <= 30.:
                 S2a = 1.
             else:
                 S2a = 1.43-0.0143*v2a
 
  #           S3a = S3j
-
-            HSI_adltMenh = zero_mult*(S1a*S2a)**(1./2.)
+            
+            # check for error in imported GAMM lookup table values - if sal/temp combination was not in table (or there is a precision mismatch), do not calculate HSI and report out error flag of -9999
+            if S1a == -9999:    
+                HSI_adltMenh = -9999
+            else:
+                HSI_adltMenh = zero_mult*(S1a*S2a)**(1./2.)
+            
             writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_adltMenh,sa,sa_1,ta,ta_1,v2a)
             fGMA.write(writestring)
 
@@ -866,8 +897,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 ########################################
 ##       Spotted Seatrout HSIs        ##
 ########################################
-##    Juvenile Spotted Seatrout HSI   ##
-########################################
+
     print( ' Calculating Juvenile and Adult Spotted Seatrout HSIs')
 # save input values that are only used in this HSI
     sal_SepNov_ave = dict((sal[n],np.mean([saldict[n][sep],saldict[n][octb],saldict[n][nov]]))for n in range(1,n500grid+1))
@@ -881,7 +911,9 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
     
     with open(HSIcsv,'w') as fSSJ, open(HSIcsv2,'w') as fSSA:
-        
+########################################
+##    Juvenile Spotted Seatrout HSI   ##
+########################################        
         headerstring1 = 'GridID,HSI,s,s_1,t,t_1,v2,savc\n'
         headerstring2 = 'GridID,HSI,s,s_1,t,t_1,v2\n'
         fSSJ.write(headerstring1)
