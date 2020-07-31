@@ -1,6 +1,5 @@
 def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header):
     import numpy as np
-    import arcpy
     print(' - mapping HSI to ASCII grid')    
 # read HSI csv file into numpy array - usecol = column of csv file that has HSI value
     newHSI = np.genfromtxt(HSIcsv,delimiter=',',usecols=[0,1],  skip_header=1)
@@ -25,7 +24,7 @@ def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header
                 except:   # if cellID is not a key in the newLULCdictionay - assign cell to NoData
                     newHSIgrid[m][n] = -9999
     print( " - saving new HSI ASCII raster file")
-    # save formatted LULC grid to ascii file with appropriate ASCII raster header
+    # save formatted grid to ascii file with appropriate ASCII raster header
     np.savetxt(HSIasc,newHSIgrid,fmt='%.2f',delimiter=' ',header=ascii_header,comments='')
     
     newHSI = 0
@@ -34,6 +33,7 @@ def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header
     
 #def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,TSSdict,ChlAdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,pctedgedict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
 # 2023 Update -- SES 6/30/20 - removed ChlAdict, TSSdict and all variables becuase not used for 2023
+
 def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
     import numpy as np
     import os
@@ -50,11 +50,12 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     e = 2.718281828
     jan,feb,mar,apr,may,jun,jul,aug,sep,octb,nov,dec = 0,1,2,3,4,5,6,7,8,9,10,11
  # 2023 Update -- SES 7/1/20 commented out all chlA and TSS in current code as not used in 2023 HSIs
+ #  changed structure of dictionaries being passed in - now keys are the grid cell itself instead of the index
  #   ChlA = ChlAdict.keys()
-    sal = saldict.keys()
-    tmp = tmpdict.keys()
+ #   sal = saldict.keys()
+ #   tmp = tmpdict.keys()
  #   TSS = TSSdict.keys()
-    dept = depthdict.keys()
+ #   dept = depthdict.keys()
     
 #    veg_ascii_grid = WM_params[61].lstrip().rstrip()
 #    veg_grid_ascii_file = os.path.normpath(vegetation_dir + '\\' + veg_ascii_grid)    
@@ -73,12 +74,12 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 # other input values that are used by specific HSIs will be written and deleted within the respective HSIs to minimize memory requirements
 # GridIDs from Ecohydro output file - this could be in a different order than n500grid, so use it as the dictionary key
 #    ChlA_JanDec_ave = dict( (ChlA[n],1000.0*np.mean([ChlAdict[n][jan],ChlAdict[n][feb],ChlAdict[n][mar],ChlAdict[n][apr],ChlAdict[n][may],ChlAdict[n][jun],ChlAdict[n][jul],ChlAdict[n][aug],ChlAdict[n][sep],ChlAdict[n][octb],ChlAdict[n][nov],ChlAdict[n][dec]])) for n in range(1,n500grid+1))
-    sal_JanDec_ave = dict((sal[n],np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
-    tmp_JanDec_ave = dict((tmp[n],np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
-    sal_AprJul_ave = dict((sal[n],np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
-    dep_JanDec_ave = dict((dept[n],depthdict[n][1])for n in range(1,n500grid+1))
-    dep_JulSep_ave = dict((dept[n],depthdict[n][0]) for n in range(1,n500grid+1)) #this is summertime depth value from hydro output
-    dep_OctJun_ave = dict((dept[n],(0.2*depthdict[n][0]+0.8*depthdict[n][1])) for n in range(1,n500grid+1))
+    sal_JanDec_ave = dict((n,np.mean([saldict[n][jan],saldict[n][feb],saldict[n][mar],saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul],saldict[n][aug],saldict[n][sep],saldict[n][octb],saldict[n][nov],saldict[n][dec]]))for n in range(1,n500grid+1))
+    tmp_JanDec_ave = dict((n,np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
+    sal_AprJul_ave = dict((n,np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
+    dep_JanDec_ave = dict((n,depthdict[n][1])for n in range(1,n500grid+1))
+    dep_JulSep_ave = dict((n,depthdict[n][0]) for n in range(1,n500grid+1)) #this is summertime depth value from hydro output
+    dep_OctJun_ave = dict((n,(0.2*depthdict[n][0]+0.8*depthdict[n][1])) for n in range(1,n500grid+1))
 
     
     #dep_JanDec_ave = dict((dept[n],np.mean([depthdict[n][jan],depthdict[n][feb],depthdict[n][mar],depthdict[n][apr],depthdict[n][may],depthdict[n][jun],depthdict[n][jul],depthdict[n][aug],depthdict[n][sep],depthdict[n][octb],depthdict[n][nov],depthdict[n][dec]]))for n in range(1,n500grid+1))
@@ -143,7 +144,6 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
     print( ' Reclassifying Veg species output into general LULC types used by HSI equations.')
 # generate some blank dictionaries that will be filled with Veg output
-    waterdict = {}    # Update 2023 turned waterdict back on b/c bald eagle uses "open water" habitat
     wetlndict = {}
     frattdict = {}
     frfltdict = {}
@@ -163,7 +163,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
     # determine portion of cell that is covered by water, land, and different wetland types
     for n in range(0,len(new_veg)):
-        gridID = new_veg[n][0]
+        gridID = int(new_veg[n][0])
         
         # use landdict to assign portion of cell that is water - this value is the updated land/water ratio AFTER the Morph run, 'WATER' value from Veg output is not needed here
         # Floating marsh Veg output was used to update land/water in WM.ImportVegResults()
@@ -301,16 +301,16 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     
     # read in GAMM lookup table for sal/temp combinations
     blucj_gamm_seine = {}
-    blucj_seine_file = os.path.normpath(r'%s\seine_bluecrab_gamm_table' % HSI_dir)
+    blucj_seine_file = os.path.normpath(r'%s\seine_bluecrab_gamm_table_1dec.txt' % HSI_dir)
     gamm_table_delimiter = '\t' #','
     with open(blucj_seine_file) as tf:
         nline = 0
         for line in tf: 
             if nline > 0:
                 linesplit = line.split(gamm_table_delimiter)
-                s = linesplit[0]
-                t = linesplit[1]
-                cpue_sc = linesplit[6]
+                s = float(linesplit[0])
+                t = float(linesplit[1])
+                cpue_sc = float(linesplit[6])
                 try:
                     blucj_gamm_seine[s][t] = cpue_sc    # if sal is already a key in the gamm dictionary, add the temp as another key and save cpue as the value
                 except:
@@ -333,7 +333,7 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
 
     with open(HSIcsv,'w') as fBC:
         
-        headerstring = 'gridID,HSIs,s_1,t,t_1,v2,oysc,savc,S1\n'
+        headerstring = 'gridID,HSI,s,s_1,t,t_1,v2,oysc,savc,S1\n'
         fBC.write(headerstring)
 
         for gridID in gridIDs:
@@ -357,15 +357,15 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             except:
                 S1 = -9999 
                
-             if v2 < 25.:
+            if v2 < 25.0:
                 S2 = 0.03*v2+0.25         # note three different functions for when v2s is less than 25.
-                 if oysc => 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
+                if oysc >= 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
                     S2 = 0.02*v2+0.5     
-                 if savc => 20.:             
+                if savc >= 20.:             
                     S2 = 0.008*v2+0.8
-             elif v2 <= 80.:
+            elif v2 <= 80.:
                 S2 = 1.0
-             else:
+            else:
                 S2 = max(0.0,(5.-0.05*v2))
     
             # check for error in imported GAMM lookup table values - if sal/temp combination was not in table (or there is a precision mismatch), do not calculate HSI and report out error flag of -9999
@@ -374,13 +374,13 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
             else:
                 HSI_juvBlueCrab = zero_mult*max(0.0,(S1*S2))**(1./2.)   # I left parentheses along here - guess it doesn't really matter, works either way
 
-            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_juvBlueCrab,s,s_1,t,t_1,v2,oysc,savc,S1)
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_juvBlueCrab,s,s_1,t,t_1,v2,oysc,savc,S1)
             fBC.write(writestring)
     
     HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
     
     # delete temporary variables so they do not accidentally get used in other HSIs
-    del(s,s_1,t,t_1,v2,oysc,savc,dayv,lnCPUE1,S1,S2)
+    del(s,s_1,t,t_1,v2,oysc,savc,dayv,blucj_gamm_seine,S1,S2)
 
     ########################################
     ##        Largemouth Bass HSI         ##
@@ -479,9 +479,9 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
         for line in tf: 
             if nline > 0:
                 linesplit = line.split(gamm_table_delimiter)
-                s = linesplit[0]
-                t = linesplit[1]
-                cpue_sc = linesplit[6]
+                s = float(linesplit[0])
+                t = float(linesplit[1])
+                cpue_sc = float(linesplit[6])
                 try:
                     gmena_gamm_seine[s][t] = cpue_sc    # if sal is already a key in the gamm dictionary, add the temp as another key and save cpue as the value
                 except:
@@ -565,7 +565,8 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
              
             # use sal & temp to lookup scaled CPUE value from GAMM lookup table (imported above)
             # if sal/temp combination does not exist in lookup table, set term to error flag which is used later to skip HSI calculation
-            try:
+           
+           try:
                 S1a = gmena_gamm_seine[round(sa_1,1)][round(ta_1,1)]        # this will lookup the scaled cpue value from the imported Menhaden seine GAMM lookup table that has precision to the tenths place #.#
             except:
                 S1a = -9999
