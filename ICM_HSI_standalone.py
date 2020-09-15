@@ -371,9 +371,9 @@ for year in range(startyear,endyear+1):
                 ave_cultch[gr] += oHSI*0.1  # after ten years, each grid cell's value will be the average cultch
         file2write = os.path.normpath(r'%s\\OysterCultch_%02d.csv'% (HSI_dir,elapsedyear))
         with open(file2write,mode='w') as fo:
-            a = fo.write('GRID_ID,REEF_PCT,SEED_PCT,CULTCH_PCT,LEASE_PCT,PCT_CULTCH')
+            a = fo.write('GRID_ID,REEF_PCT,SEED_PCT,CULTCH_PCT,LEASE_PCT,PCT_CULTCH\n')
             for n in grid_comp.keys():
-                a = fo.write('%d,0,0,0,0,%d' % (n,100.*ave_cultch[n]) ) # cultch file is in integers and we only need the last column populated with the average HSI - fill all other columns with 0
+                a = fo.write('%d,0,0,0,0,%d\n' % (n,100.*ave_cultch[n]) ) # cultch file is in integers and we only need the last column populated with the average HSI - fill all other columns with 0
 
         
     # generate cultch surface from pre-existing Cultch map file written every 10 years
