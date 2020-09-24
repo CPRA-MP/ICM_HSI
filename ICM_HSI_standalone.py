@@ -257,7 +257,7 @@ for year in range(startyear,endyear+1):
     # landdict is a dictionary of percent land (0-100) in each 500-m grid cell, key is gridID
     # waterdict is a dictionary of percent water (0-100) in each 500-m grid cell, key is gridID
     # wetlanddict is a dictionary of percent wetland (0-100) (percet land - percent upland) in each 500-m grid cell, key is gridID
-    bedelevdict = dict((int(griddata[n][0]),griddata[n][1]) for n in range(0,n500grid))= 
+    bedelevdict = dict((int(griddata[n][0]),griddata[n][1]) for n in range(0,n500grid))
     melevdict   = dict((int(griddata[n][0]),griddata[n][2]) for n in range(0,n500grid))
     landdict    = dict((int(griddata[n][0]),griddata[n][3]) for n in range(0,n500grid))
     waterdict   = dict((int(griddata[n][0]),griddata[n][5]) for n in range(0,n500grid))
