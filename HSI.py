@@ -835,6 +835,7 @@ for n in gridIDs:
 
     # read in GAMM lookup table for sal/temp combinations for juv and adult spotted seatrout
     sstrtj_gamm_seine = {}
+    
     sstrtj_seine_file = os.path.normpath(r'%s\seine_spottedseatrout_gamm_table_1dec.txt' % HSI_dir)
     gamm_table_delimiter = '\t' #','
     with open(sstrtj_seine_file) as tf:
@@ -908,7 +909,13 @@ for n in gridIDs:
     ###      Adult Spotted Seatrout HSI    ##
     #########################################
 
+    # add keys for julian dates (day of year, doy) stored in monthly GAMMS tables
+    doy_in_table = [15,45,70,100.....]      # update this to match values of julian date included in sal/temp/doy GAMM text table
+    
     sstrta_gamm_gilln = {}
+    for doy in doy_in_table:
+        sstrta_gamm_gilln[doy] = {}
+    
     sstrta_gilln_file = os.path.normpath(r'%s\gillnet_spottedseatrout_gamm_table_1dec.txt' % HSI_dir)
     gamm_table_delimiter = '\t' #','
     with open(sstrta_gilln_file) as tf:
@@ -918,13 +925,16 @@ for n in gridIDs:
                 linesplit = line.split(gamm_table_delimiter)
                 s = float(linesplit[0])
                 t = float(linesplit[1])
+                Shaye - double check that doy is in column 3
+                doy = int(linesplit[2])                   # assuming doy is 3-column and integer value in GAMM text table
                 cpue_sc = float(linesplit[6])
             try:
-                sstrta_gamm_gilln[s][t] = cpue_sc    # if sal is already a key in the gamm dictionary, add the temp as another key and save cpue as the value
+                sstrta_gamm_gilln[doy][s][t] = cpue_sc    # if sal is already a key in the gamm dictionary, add the temp as another key and save cpue as the value
             except:
-                sstrta_gamm_gilln[s] = {}            # if sal is not already a key in gamm dictionary, add sal as key and the value will be an empty dictionary
-                sstrta_gamm_gilln[s][t] = cpue_sc    # populate dictionary with temp as key and cpue as value
+                sstrta_gamm_gilln[doy][s] = {}            # if sal is not already a key in gamm dictionary, add sal as key and the value will be an empty dictionary
+                sstrta_gamm_gilln[doy][s][t] = cpue_sc    # populate dictionary with temp as key and cpue as value
             nline +=1
+
 
     HSIcsv2 = r'%sSPSTA.csv' % csv_outprefix
     HSIasc2 = r'%sSPSTA.asc' % asc_outprefix
@@ -935,27 +945,56 @@ for n in gridIDs:
 
         for gridID in gridIDs:
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
-            sa = sal_JanDec_ave[gridID]
-            ta = tmp_JanDec_ave[gridID]
             v2a = max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
-            dayva = 180.1
-
-    # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
-            sa_1 = min(sa,36.8)
-            ta_1 = max(3.4,min(ta,35.9))
             
-    # use sal & temp to lookup scaled CPUE value from GAMM lookup table (imported above)
-    # if sal/temp combination does not exist in lookup table, set term to error flag which is used later to skip HSI calculation
-           
-            try:
-                S1a = sstrta_gamm_gilln[round(sa_1,1)][round(ta_1,1)]        # this will lookup the scaled cpue value from the imported seatrout gillnet GAMM lookup table that has precision to the tenths place #.#
-#                print('sa_1 ta_1 S1a',sa_1, ta_1, S1a)             # Shaye checking if in gamm table lookup
-#                wait = input("PRESS ENTER TO CONTINUE")
-                if S1a < 0.0:
-                    S1a = 0.0
-            except:
+            # the following section calculates arithmetic mean for S1a for however many julian days are included in the doy_in_table list
+            # the doy_in_table list should match the number of julian dates that are included in the GAMM lookup table
+            S1a = 0.                                # initialize running sum of S1a to 0 before starting monthly loop
+            n_loop = 0                               # initialize counter for number of loops that are being averaged into S1a
+            for mon in range(0,len(doy_in_table)):                  
+                doy = doy_in_table[mon]             # doy_in_table is the 'julian date' values in the GAMMs lookup table - set above
+                sa = saldict[gridID][mon]           # saldict has monthly keys for jan=0, feb=1, ..., dec=11
+                ta = tmpdict[gridID][mon]           # tmpdict has monthly keys for jan=0, feb=1, ..., dec=11
+                
+                # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
+                sa_1 = min(sa,36.8)
+                ta_1 = max(3.4,min(ta,35.9))
+                
+                # use doy, sal & temp to lookup scaled CPUE value from GAMM lookup table (imported above)                
+                # add to running sum of S1a that will be used in calculating arithmetic mean
+                try:
+                    S1a += sstrta_gamm_gilln[doy][round(sa_1,1)][round(ta_1,1)] 
+                    n_loop += 1                          # at end of successful loop, update denominator for mean by 1
+                except:
+                    dump = 'could not find CPUE in GAMM lookup - month will be excluded from calculation of mean S1a'
+            if n_loop > 0:
+                S1a = S1a/float(n_loop)                           # divide running sum of S1a by number of iterations get arthmetic mean
+            else:
                 S1a = -9999
 
+        # if you need to calculate geometric mean instead of arithmetic mean
+        # instead of adding S1a lookup values in a running sum - append the lookup values into a list
+        # this will require 'import scipy' and possibly 'from scipy import stats'
+        #    S1a_list = []
+        #    for mon in range(0,len(doy_in_table)):
+        #    try:
+        #        doy = doy_in_table[mon]             # doy_in_table is the 'julian date' values in the GAMMs lookup table - set above
+        #        sa = saldict[gridID][mon]           # saldict has monthly keys for jan=0, feb=1, ..., dec=11
+        #        ta = tmpdict[gridID][mon]           # tmpdict has monthly keys for jan=0, feb=1, ..., dec=11
+        #        
+        #       # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
+        #        sa_1 = min(sa,36.8)
+        #        ta_1 = max(3.4,min(ta,35.9))
+        #        S1a_list.append(sstrta_gamm_gilln[doy][round(sa_1,1)][round(ta_1,1)] )
+        #    except: 
+        #        dump = 'could not find CPUE in GAMM lookup - month will be excluded from calculation of mean S1a'
+        #    if len(S1a_list) > 0:
+        #        S1a = scipy.stats.gmean(S1a_list)
+        #    else:
+        #        S1a = -9999
+                             
+    # if sal/temp combination does not exist in lookup table, set term to error flag which is used later to skip HSI calculation
+           
             if v2a < 25.0:
                 S2a = 0.7 +0.012*v2a
             elif v2a >= 25.0 and v2a <= 70.0:
