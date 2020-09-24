@@ -307,11 +307,13 @@ for year in range(startyear,endyear+1):
     # value will be an array of 12 monthly values
     saldict = {}
     tmpdict = {}
+    stgmndict = {}
 
     
     for n in grid_comp.keys():
         saldict[n] = []
         tmpdict[n] = []
+        stgmndict[n] = []
 
     # calculate monthly averages for compartment
     print('   - calculating monthly averages from daily timeseries compartment data')
@@ -342,7 +344,18 @@ for year in range(startyear,endyear+1):
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
         for n in grid_comp.keys():
             tmpdict[n].append(round(mon_ave[n],1)) # this will save monthly mean to the tenths decimal #.# precision
-
+        
+        ##############
+        # Monthly Stage 
+        ##############
+        # read in daily temperature and calculate monthly mean for compartment then map to grid using daily2ave and comp2grid functions
+        daily_timeseries_file = os.path.normpath(r'%s\\STG.out' % ecohydro_dir)
+        comp_month_ave_dict = daily2ave(data_start,ave_start,ave_end,daily_timeseries_file,ndays_run)
+        mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
+        # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
+        for n in grid_comp.keys():
+            stgmndict[n].append(mon_ave[n])
+        
 
 
     # run HSI function (run in HSI directory so output files are saved there)
@@ -413,7 +426,7 @@ for year in range(startyear,endyear+1):
     
     # remove try/except so errors in HSI are returned and timestepping stops
     #try:
-    HSI.HSI(gridIDs,stagedict,bedelevdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix)
+    HSI.HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix)
     #except:
     #    print('******ERROR******')
     #    print('\n HSI model run failed - Year %s.' % year)
