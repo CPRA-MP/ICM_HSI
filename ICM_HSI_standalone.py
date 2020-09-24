@@ -270,9 +270,14 @@ for year in range(startyear,endyear+1):
     BDWaterVal = float(WM_params[31].lstrip().rstrip())
     # convert sediment deposition loading (kg/m2) to depth (mm) using bulk density of open water area (kg/m3)
     # if deposition is negative, that indicates erosion
+    
+    #  sed deposition in ICM-Hydro is calculated in g/m^2
+    #  must convert to g/cm^2    ! [g/cm^2] = [g/m^2]*[m/100 cm]*[m/100 cm] = [g/m^2]/10000
+    #  depth mineral deposition [cm] =  mineral depostion [g/cm2] / open water bed bulk density [g/cm3] 
     for n in grid_comp.keys():
-        
-        OWseddep_depth_mm_dict[n] = max(0.0,(grid500_res**2)*OWseddep_mass_dict[n]*1000./BDWaterVal)
+        depo_g_cm2 = max(0.0,OWseddep_mass_dict[n]/10000.)  # seddep in ICM-Hydro is negative if eroded...only take positive values here for deposited depth
+        depo_cm = depo_g_cm/BDWaterVal 
+        OWseddep_depth_mm_dict[n] = depo_cm/10.0
     
     del(OWseddep_mass_dict,comp_summary_dict)
     
