@@ -30,7 +30,7 @@ def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header
     newHSI = 0
     newHSIdict = {}
 
-def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
+def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
     import numpy as np
     import os
     import csv
@@ -62,10 +62,29 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     tmp_JanDec_ave = dict((n,np.mean([tmpdict[n][jan],tmpdict[n][feb],tmpdict[n][mar],tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul],tmpdict[n][aug],tmpdict[n][sep],tmpdict[n][octb],tmpdict[n][nov],tmpdict[n][dec]]))for n in range(1,n500grid+1))
     sal_AprJul_ave = dict((n,np.mean([saldict[n][apr],saldict[n][may],saldict[n][jun],saldict[n][jul]]))for n in range(1,n500grid+1))
     tmp_AprJul_ave = dict((n,np.mean([tmpdict[n][apr],tmpdict[n][may],tmpdict[n][jun],tmpdict[n][jul]]))for n in range(1,n500grid+1))
-    dep_JanDec_ave = dict((n,depthdict[n][1])for n in range(1,n500grid+1))
-    dep_JulSep_ave = dict((n,depthdict[n][0]) for n in range(1,n500grid+1)) #this is summertime depth value from hydro output
-    dep_OctJun_ave = dict((n,(0.2*depthdict[n][0]+0.8*depthdict[n][1])) for n in range(1,n500grid+1))    
-
+    
+# calculate average elevation for grid cell from values for marsh elev and bed elev imported separately
+grid_elv_ave = {}
+for n in gridIDs:
+    use_water = 0
+    use_land = 0
+    if waterdict[n] > 0:
+        if bedelevdict != -9999:
+            use_water = 1   # have values for both percent water and bed elevation
+    if landdict[n] > 0
+        if bedelevdict != -9999:
+            use_land = 1    # have values for both percent land and marsh elevation
+    if use_water == 1:
+        if use_land == 1:   # have both land and water data - calculate weighted mean elevation
+            grid_elv_ave[n] = ( bedelevdict[n]*waterdict[n] + melevdict[n]*landdict[n] ) / (waterdict[n] + landdict[n])
+        else:               # have only water data
+            grid_elv_ave[n] = bedelevdict[n]
+    else:
+        if use_land == 1:   # have only land data
+            grid_elv_ave[n] = melevdict[n]
+        else:               # do not have land or water data
+            grid_elv_ave[n] = -9999
+    
 #    sed_JanDec_sm = dict((n,OWseddep_depth_mm_dict[n][1]) for n in range(1,n500grid+1))
 #    sed_JanDec_sm = dict((n,np.sum([OWseddep_depth_mm_dict[n][jan],OWseddep_depth_mm_dict[n][feb],OWseddep_depth_mm_dict[n][mar],OWseddep_depth_mm_dict[n][apr],OWseddep_depth_mm_dict[n][may],OWseddep_depth_mm_dict[n][jun],OWseddep_depth_mm_dict[n][jul],OWseddep_depth_mm_dict[n][aug],OWseddep_depth_mm_dict[n][sep],OWseddep_depth_mm_dict[n][octb],OWseddep_depth_mm_dict[n][nov],OWseddep_depth_mm_dict[n][dec]]))for n in range(1,n500grid+1))
 
@@ -1601,9 +1620,9 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     #############################
 
     print( 'Calculating Crawfish HSI.')
-    # saving new inputs for just this HSI 
-    dep_DecJul_ave = dict((n,depthdict[n][1])for n in range(1,n500grid+1))   # these are pulled from top, not quite right.  Need to see depthdict file for set up - SES 9/15/20
-    dep_AugNov_ave = dict((n,depthdict[n][0]) for n in range(1,n500grid+1)) 
+    # saving new inputs for just this HSI
+    stg_DecJul_ave[gridID] = dict((n,np.mean([stgmndict[n][jan],[stgmndict[n][feb],[stgmndict[n][mar],[stgmndict[n][apr],[stgmndict[n][may],[stgmndict[n][jun],[stgmndict[n][jul],[stgmndict[n][dec] ]))for nn in range(1,n500grid+1))
+    stg_AugNov_ave[gridID] dict((n,np.mean([stgmndict[n][aug],[stgmndict[n][sep],[stgmndict[n][octb],[stgmndict[n][nov] ]))for nn in range(1,n500grid+1))
     
     HSIcsv = r'%sCRAYF.csv' % csv_outprefix
     HSIasc = r'%sCRAYF.asc' % asc_outprefix
@@ -1615,8 +1634,16 @@ def HSI(gridIDs,stagedict,depthdict,melevdict,saldict,tmpdict,veg_output_filepat
     
         for gridID in gridIDs:
             s = sal_JanDec_ave[gridID]
-            depdj = 100.0*dep_DecJul_ave[gridID]
-            depan = 100.0*dep_AugNov_ave[gridID]
+            elv = grid_elv_ave[gridID]
+            
+            if elv > -9999
+                depdj = 100.0*(stg_DecJul_ave[gridID]-elv)
+                depan = 100.0*(stg_AugNov_ave[gridID]-elv)
+            else:
+                depdj = -9999.
+                depan = -9999.
+            
+            
             swampfor = swfordict[gridID]
             fresh = frattdict[gridID]+ frfltdict[gridID]
             wat = waterdict[gridID]
