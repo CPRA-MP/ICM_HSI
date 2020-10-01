@@ -281,7 +281,7 @@ for year in range(startyear,endyear+1):
     #  depth mineral deposition [cm] =  mineral depostion [g/cm2] / open water bed bulk density [g/cm3] 
     for n in grid_comp.keys():
         depo_g_cm2 = max(0.0,OWseddep_mass_dict[n]/10000.)  # seddep in ICM-Hydro is negative if eroded...only take positive values here for deposited depth
-        depo_cm = depo_g_cm/BDWaterVal 
+        depo_cm = depo_g_cm2/BDWaterVal 
         OWseddep_depth_mm_dict[n] = depo_cm/10.0
     
     del(OWseddep_mass_dict,comp_summary_dict)
