@@ -172,15 +172,15 @@ vterm = inputs[45,1].lstrip().rstrip()
 rterm = inputs[46,1].lstrip().rstrip()
 runprefix = '%s_%s_%s_%s_%s_%s_%s' % (mpterm,sterm,gterm,cterm,uterm,vterm,rterm)
 
-EHtemp_path = os.path.normpath(r'%s\\TempFiles' % ecohydro_dir)
+EHtemp_path = os.path.normpath(r'%s/TempFiles' % ecohydro_dir)
 
 ## read Wetland Morph parameters csv file into array (first column is descriptor, second column is variable)                            
-WMConfigFilepath = os.path.normpath(r'%s\\%s' % (wetland_morph_dir,WMConfigFile) )
+WMConfigFilepath = os.path.normpath(r'%s/%s' % (wetland_morph_dir,WMConfigFile) )
 WM_params = np.genfromtxt(WMConfigFilepath,dtype=str,delimiter=',',usecols=1)   
 
 # read in grid-to-compartment lookup table into a dictionary
 # key is grid ID and value is compartment
-grid_lookup_file = r'%s\grid_lookup_500m.csv' % ecohydro_dir
+grid_lookup_file = r'%s/grid_lookup_500m.csv' % ecohydro_dir
 grid_lookup = np.genfromtxt(grid_lookup_file,skip_header=1,delimiter=',',dtype='int',usecols=[0,1])
 grid_comp = {row[0]:row[1] for row in grid_lookup}
 grid500_res = 500.0
@@ -201,7 +201,7 @@ for year in range(startyear,endyear+1):
     elapsedyear = year - startyear + 1
     
     veg_output_file = '%s_O_%02d_%02d_V_vegty.asc+' % (runprefix,elapsedyear,elapsedyear)
-    veg_output_filepath = os.path.normpath(vegetation_dir + '\\' + veg_output_file)
+    veg_output_filepath = os.path.normpath(vegetation_dir + '/' + veg_output_file)
         
     dom = {}
     dom[1]=31
@@ -233,10 +233,10 @@ for year in range(startyear,endyear+1):
         else:
             new_grid_file = 'grid_data_500m_%s.csv' % (year+1)  # this must match name set in "WM.CalculateEcohydroAttributes" with the exception of (year) here instead of CurrentYear
     
-    new_grid_filepath = os.path.normpath('%s\\%s' % (EHtemp_path,new_grid_file)) # location of Morph output data grid file after it is generated in "WM.CalculateEcohydroAttributes"
+    new_grid_filepath = os.path.normpath('%s/%s' % (EHtemp_path,new_grid_file)) # location of Morph output data grid file after it is generated in "WM.CalculateEcohydroAttributes"
     
     EH_grid_out_newfile = '%s_%s.%s' % (str.split(grid_output_file,'.')[0],year,str.split(grid_output_file,'.')[1])
-    EH_grid_results_filepath = os.path.normpath('%s\\%s' % (EHtemp_path,EH_grid_out_newfile)) # location of Hydro output data grid file
+    EH_grid_results_filepath = os.path.normpath('%s/%s' % (EHtemp_path,EH_grid_out_newfile)) # location of Hydro output data grid file
     
     ##############################################
     ##    HABITAT SUITABILITY INDICES ~ HSIs    ##
@@ -268,7 +268,7 @@ for year in range(startyear,endyear+1):
     print('   - annual compartment summary data')
     
     # import annual open water sediment deposition (mass/area) data by ICM-Hydro compartment (OW_sed_dep is 11th column in compartment_out_YYYY.csv)
-    comp_summary_file = os.path.normpath(r'%s\\TempFiles\\compartment_out_%4d.csv' % (ecohydro_dir,year) )
+    comp_summary_file = os.path.normpath(r'%s/TempFiles/compartment_out_%4d.csv' % (ecohydro_dir,year) )
     comp_summary_dict = compout2dict(comp_summary_file,10)
     OWseddep_mass_dict = comp2grid(comp_summary_dict,grid_comp)
     OWseddep_depth_mm_dict = {}
@@ -299,7 +299,7 @@ for year in range(startyear,endyear+1):
     # read in daily timeseries and calculate averages for each ICM-Hydro compartment for a variety of variables
     
     # check length of timeseries.out files once for year and save total length of file
-    daily_timeseries_file = os.path.normpath(r'%s\\SAL.out' % ecohydro_dir)
+    daily_timeseries_file = os.path.normpath(r'%s/SAL.out' % ecohydro_dir)
     ndays_run = file_len(daily_timeseries_file)
       
     # build empty dictionaries that will be filled with monthly average values
@@ -327,7 +327,7 @@ for year in range(startyear,endyear+1):
         # Salinity   
         ##############
         # read in daily salinity and calculate monthly mean for compartment then map to grid using daily2ave and comp2grid functions
-        daily_timeseries_file = os.path.normpath(r'%s\\SAL.out' % ecohydro_dir)
+        daily_timeseries_file = os.path.normpath(r'%s/SAL.out' % ecohydro_dir)
         comp_month_ave_dict = daily2ave(data_start,ave_start,ave_end,daily_timeseries_file,ndays_run)
         mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
@@ -338,7 +338,7 @@ for year in range(startyear,endyear+1):
         # Temperature 
         ##############
         # read in daily temperature and calculate monthly mean for compartment then map to grid using daily2ave and comp2grid functions
-        daily_timeseries_file = os.path.normpath(r'%s\\TMP.out' % ecohydro_dir)
+        daily_timeseries_file = os.path.normpath(r'%s/TMP.out' % ecohydro_dir)
         comp_month_ave_dict = daily2ave(data_start,ave_start,ave_end,daily_timeseries_file,ndays_run)
         mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
@@ -349,7 +349,7 @@ for year in range(startyear,endyear+1):
         # Monthly Stage 
         ##############
         # read in daily temperature and calculate monthly mean for compartment then map to grid using daily2ave and comp2grid functions
-        daily_timeseries_file = os.path.normpath(r'%s\\STG.out' % ecohydro_dir)
+        daily_timeseries_file = os.path.normpath(r'%s/STG.out' % ecohydro_dir)
         comp_month_ave_dict = daily2ave(data_start,ave_start,ave_end,daily_timeseries_file,ndays_run)
         mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
@@ -362,7 +362,7 @@ for year in range(startyear,endyear+1):
     os.chdir(HSI_dir)
 
     # import percent edge output from geomorph routine that is summarized by grid ID
-    pctedge_file = os.path.normpath('%s\\%s_N_%02d_%02d_W_pedge.csv'% (HSI_dir,runprefix,elapsedyear,elapsedyear)) # this must match name set in "WM.CalculateEcohydroAttributes" with the exception of (year) here instead of CurrentYear
+    pctedge_file = os.path.normpath('%s/%s_N_%02d_%02d_W_pedge.csv'% (HSI_dir,runprefix,elapsedyear,elapsedyear)) # this must match name set in "WM.CalculateEcohydroAttributes" with the exception of (year) here instead of CurrentYear
     pedge = np.genfromtxt(pctedge_file,delimiter = ',',skip_header = 1)
     pctedgedict = dict((int(pedge[n][0]),pedge[n][1]) for n in range(0,n500grid))
     del(pedge)
@@ -385,13 +385,13 @@ for year in range(startyear,endyear+1):
         for n in grid_comp.keys():
             ave_cultch[n] = 0.0
         for oyr in range(elapsedyear-10,elapsedyear):
-            OYSE_filepath = os.path.normpath(r'%s\\%s_O_%02d_%02d_X_OYSTE.csv'% (HSI_dir,runprefix,oyr,oyr))
+            OYSE_filepath = os.path.normpath(r'%s/%s_O_%02d_%02d_X_OYSTE.csv'% (HSI_dir,runprefix,oyr,oyr))
             oyr_OYSE = np.genfromtxt(OYSE_filepath,delimiter=',',skip_header=1,dtype='str')
             for row in oyr_OYSE:
                 gr = int(row[0])
                 oHSI = float(row[1])
                 ave_cultch[gr] += oHSI*0.1  # after ten years, each grid cell's value will be the average cultch
-        file2write = os.path.normpath(r'%s\\OysterCultch_%02d.csv'% (HSI_dir,elapsedyear))
+        file2write = os.path.normpath(r'%s/OysterCultch_%02d.csv'% (HSI_dir,elapsedyear))
         with open(file2write,mode='w') as fo:
             a = fo.write('GRID_ID,REEF_PCT,SEED_PCT,CULTCH_PCT,LEASE_PCT,PCT_CULTCH\n')
             for n in grid_comp.keys():
@@ -401,7 +401,7 @@ for year in range(startyear,endyear+1):
     # generate cultch surface from pre-existing Cultch map file written every 10 years
     # this dictionary will be saved in memory and will only be updated if a new map is generated for the decade
     if elapsedyear in [1,11,21,31,41]:
-        cultch_file = os.path.normpath(r'%s\\OysterCultch_%02d.csv'% (HSI_dir,oyr2use))
+        cultch_file = os.path.normpath(r'%s/OysterCultch_%02d.csv'% (HSI_dir,oyr2use))
         cultchdict = {}
         cnp = np.genfromtxt(cultch_file,skip_header=True,usecols=(0,5),delimiter=',')
         for row in cnp:
