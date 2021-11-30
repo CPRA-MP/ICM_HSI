@@ -367,24 +367,16 @@ for year in range(startyear,endyear+1):
     pctedgedict = dict((int(pedge[n][0]),pedge[n][1]) for n in range(0,n500grid))
     del(pedge)
     
-    # find year to use for cultch map, cultch map will be re-built and updated at the start of each decade
-    if elapsedyear < 11:
-        oyr2use = 1
-    elif elapsedyear < 21:
-        oyr2use = 11
-    elif elapsedyear < 31:
-        oyr2use = 21
-    elif elapsedyear < 41:
-        oyr2use = 31
-    else:
-        oyr2use = 41
-   
-#   # if new decade then build new Cultch map from previous oyster HSI outputs
-    if elapsedyear in [11,21,31,41]:
+    # years when oyster cultch map is re-calculated from previous Oyster HSI outputs
+    OYE_cultch_update_years = [1,3,13,23,33,43]
+    oyr2use = OYE_cultch_update_years[np.searchsorted(OYE_cultch_update_years,elapsedyear,side='right')-1]
+                                             
+    # if new decade (or end of spin-up period) build new Cultch map from previous oyster HSI outputs
+    if elapsedyear in OYE_cultch_update_years[1:]:
         ave_cultch = {}
         for n in grid_comp.keys():
             ave_cultch[n] = 0.0
-        for oyr in range(elapsedyear-10,elapsedyear):
+        for oyr in range(elapsedyear-years4update,elapsedyear):
             OYSE_filepath = os.path.normpath(r'%s/%s_O_%02d_%02d_X_OYSTE.csv'% (HSI_dir,runprefix,oyr,oyr))
             oyr_OYSE = np.genfromtxt(OYSE_filepath,delimiter=',',skip_header=1,dtype='str')
             for row in oyr_OYSE:
@@ -399,14 +391,12 @@ for year in range(startyear,endyear+1):
 
         
     # generate cultch surface from pre-existing Cultch map file written every 10 years
-    # this dictionary will be saved in memory and will only be updated if a new map is generated for the decade
-    if elapsedyear in [1,11,21,31,41]:
-        cultch_file = os.path.normpath(r'%s/OysterCultch_%02d.csv'% (HSI_dir,oyr2use))
-        cultchdict = {}
-        cnp = np.genfromtxt(cultch_file,skip_header=True,usecols=(0,5),delimiter=',')
-        for row in cnp:
-            gid = int(row[0])
-            cultchdict[gid] = row[1]
+    cultch_file = os.path.normpath(r'%s/OysterCultch_%02d.csv'% (HSI_dir,oyr2use))
+    cultchdict = {}
+    cnp = np.genfromtxt(cultch_file,skip_header=True,usecols=(0,5),delimiter=',')
+    for row in cnp:
+        gid = int(row[0])
+        cultchdict[gid] = row[1]
 
 # print statements to check all keys are imported and correct format (should all be integers)    
 #    print( len(landdict.keys()),min(landdict.keys()),max(landdict.keys()) )
