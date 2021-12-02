@@ -372,17 +372,26 @@ for year in range(startyear,endyear+1):
     oyr2use = OYE_cultch_update_years[np.searchsorted(OYE_cultch_update_years,elapsedyear,side='right')-1]
                                              
     # if new decade (or end of spin-up period) build new Cultch map from previous oyster HSI outputs
-    if elapsedyear in OYE_cultch_update_years[1:]:
+    if elapsedyear in OYE_cultch_update_years:
         ave_cultch = {}
-        for n in grid_comp.keys():
-            ave_cultch[n] = 0.0
-        for oyr in range(elapsedyear-years4update,elapsedyear):
-            OYSE_filepath = os.path.normpath(r'%s/%s_O_%02d_%02d_X_OYSTE.csv'% (HSI_dir,runprefix,oyr,oyr))
-            oyr_OYSE = np.genfromtxt(OYSE_filepath,delimiter=',',skip_header=1,dtype='str')
-            for row in oyr_OYSE:
-                gr = int(row[0])
-                oHSI = float(row[1])
-                ave_cultch[gr] += oHSI*0.1  # after ten years, each grid cell's value will be the average cultch
+        # during spin up period (e.g. before second year listed in OYE_cultch_update_years), set cultch to optimal value
+        if elapsedyear < OYE_cultch_update_years[1]:
+            for n in grid_comp.keys():
+                ave_cultch[n] = 1.0
+        # after spinup, update cultch by setting equal to the average oyster HSI values since last cultch update was made
+        else:
+            ey_index = OYE_cultch_update_years.index(elapsedyear)
+            years4update = OYE_cultch_update_years[ey_index] - OYE_cultch_update_years[ey_index-1]
+            for n in grid_comp.keys():
+                ave_cultch[n] = 0.0
+            for oyr in range(elapsedyear-years4update,elapsedyear):
+                OYSE_filepath = os.path.normpath(r'%s/%s_O_%02d_%02d_X_OYSTE.csv'% (HSI_dir,runprefix,oyr,oyr))
+                oyr_OYSE = np.genfromtxt(OYSE_filepath,delimiter=',',skip_header=1,dtype='str')
+                for row in oyr_OYSE:
+                    gr = int(row[0])
+                    oHSI = float(row[1])
+                    ave_cultch[gr] += oHSI/years4update  # after looping over all years4update, each grid cell's value will be the average cultch
+        
         file2write = os.path.normpath(r'%s/OysterCultch_%02d.csv'% (HSI_dir,elapsedyear))
         with open(file2write,mode='w') as fo:
             a = fo.write('GRID_ID,REEF_PCT,SEED_PCT,CULTCH_PCT,LEASE_PCT,PCT_CULTCH\n')
