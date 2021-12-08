@@ -30,7 +30,7 @@ def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header
     newHSI = 0
     newHSIdict = {}
 
-def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,WM_params,vegetation_dir,wetland_morph_dir,runprefix):
+def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,vegetation_dir,wetland_morph_dir,runprefix):
     import numpy as np
     import os
     import csv
@@ -126,22 +126,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         print( ' Some Vegetation output was not written correctly to Veg output file.')
         print('  - %s 500m grid cells did not have complete results in Veg Output file.' % veg_missing)
     
-    # read lookup table into dictionary that converts output VegType to new LULC value
-    LULC_Lookup = r'%s\\%s' % (wetland_morph_dir,WM_params[32].lstrip().rstrip())           #this is the same code as in WM.main()
-    LULC_OldValField = WM_params[33].lstrip().rstrip()      #this is the same code as in WM.main()
-    LULC_NewValField = WM_params[34].lstrip().rstrip()      #this is the same code as in WM.main()
 
-    VegLULC_lookup={}
-    with open(LULC_Lookup, mode='r') as infile:
-        for i,row in enumerate(infile):
-            if i == 0:
-                hds = row.split(',')
-                for n in range(0,len(hds)):
-                    hds[n] = hds[n].lstrip().rstrip()   #remove any leading or trailing spaces
-                old = hds.index(LULC_OldValField)
-                new = hds.index(LULC_NewValField)
-            else:
-                VegLULC_lookup[row.split(',')[old].rstrip().lstrip()]=row.split(',')[new].rstrip().lstrip()    
 
     print( ' Reclassifying Veg species output into general LULC types used by HSI equations.')
 # generate some blank dictionaries that will be filled with Veg output
@@ -205,60 +190,51 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         
        
         # loop through Veg output and add percent cover to the respective wetland type dictionaries
-        # veg output is portion of cell covered by species (0-1) HSI equations use percentages - therefore multiply Veg data by 100
-        for k in VegLULC_lookup.keys():         # k is veg type as dictionary key in VegLULC_lookup
-            vc = vegtypenames.index(k)          # vc is column in new_veg array that matches veg type, k
-            nlulc = int(VegLULC_lookup[k])      # nlulc is new LULC number to convert veg type,k, t
+        # Fresh forested LULC
+        if nlulc == 1:
+            #wetlndict[gridID] += new_veg[n][vc] #do not consider fresh forested as a 'wetland' type
+            btfordict[gridID] += new_veg[n][vc]
+            swfordict[gridID] += new_veg[n][vc]
             
-            # Fresh forested LULC
-            if nlulc == 1:
-                #wetlndict[gridID] += new_veg[n][vc] #do not consider fresh forested as a 'wetland' type
-                btfordict[gridID] += new_veg[n][vc]
-                swfordict[gridID] += new_veg[n][vc]
-                
-            # Fresh herbaceous wetland LULC
-            if nlulc == 2:
-                wetlndict[gridID] += new_veg[n][vc]
-                frattdict[gridID] += new_veg[n][vc]
+        # Fresh herbaceous wetland LULC
+        if nlulc == 2:
+            wetlndict[gridID] += new_veg[n][vc]
+            frattdict[gridID] += new_veg[n][vc]
+        
+        # Intermediate herbaceous wetland LULC    
+        if nlulc == 3:
+            wetlndict[gridID] += new_veg[n][vc]
+            interdict[gridID] += new_veg[n][
+        # Brackish herbaceous wetland LULC                
+        if nlulc == 4:
+            wetlndict[gridID] += new_veg[n][vc]
+            brackdict[gridID] += new_veg[n][vc]
+        # Saline herbaceous wetland LULC                
+        if nlulc == 5:
+            wetlndict[gridID] += new_veg[n][vc]
+            salmardict[gridID] += new_veg[n][vc]
+        
+        # Subaqauatic vegetation LULC
+        if vc == vegtypenames.index('SAV'):
+            watsavdict[gridID] += new_veg[n][
+        # Live floating marsh LULC                
+        if nlulc == 8:              
+            frfltdict[gridID] += new_veg[n][vc]
+            wetlndict[gridID] += frfltdict[gridID]      # add floating marsh percent cover to the total wetland percent co
+        if nlulc == 9:
+            baredict[gridID] += new_veg[n][vc]
+         
+        # Bald cypress
+        if vc == vegtypenames.index('TADI2'): 
+            baldcypdict[gridID] = new_veg[n][vc]
             
-            # Intermediate herbaceous wetland LULC    
-            if nlulc == 3:
-                wetlndict[gridID] += new_veg[n][vc]
-                interdict[gridID] += new_veg[n][vc]
-
-            # Brackish herbaceous wetland LULC                
-            if nlulc == 4:
-                wetlndict[gridID] += new_veg[n][vc]
-                brackdict[gridID] += new_veg[n][vc]
-            # Saline herbaceous wetland LULC                
-            if nlulc == 5:
-                wetlndict[gridID] += new_veg[n][vc]
-                salmardict[gridID] += new_veg[n][vc]
+        # Black mangrove
+        if vc == vegtypenames.index('AVGE'): 
+            blackmangrovedict[gridID] = new_veg[n][vc]
             
-            # Subaqauatic vegetation LULC
-            if vc == vegtypenames.index('SAV'):
-                watsavdict[gridID] += new_veg[n][vc]
-
-            # Live floating marsh LULC                
-            if nlulc == 8:              
-                frfltdict[gridID] += new_veg[n][vc]
-                wetlndict[gridID] += frfltdict[gridID]      # add floating marsh percent cover to the total wetland percent cover
-
-            if nlulc == 9:
-                baredict[gridID] += new_veg[n][vc]
-                
-
-            # Bald cypress
-            if vc == vegtypenames.index('TADI2'): 
-                baldcypdict[gridID] = new_veg[n][vc]
-                
-            # Black mangrove
-            if vc == vegtypenames.index('AVGE'): 
-                blackmangrovedict[gridID] = new_veg[n][vc]
-                
-            # Marsh elder
-            if vc == vegtypenames.index('IVFR'):
-                marshelderdict[gridID] = new_veg[n][vc]
+        # Marsh elder
+        if vc == vegtypenames.index('IVFR'):
+            marshelderdict[gridID] = new_veg[n][vc]
 # Check for bareground                 
 # if there is no wetland or forest type, but there is bareground, set bareground multiplier to zero
 
