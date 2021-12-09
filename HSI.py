@@ -36,7 +36,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     import csv
     import code
 
-# set some general variables
+    # set some general variables
     print( ' Setting up HSI runs.')
 
     asc_outprefix = r'%s\\output_%02d\\Deliverables\\%s_O_%02d_%02d_X_' % (wetland_morph_dir,elapsedyear,runprefix,elapsedyear,elapsedyear)
@@ -52,8 +52,6 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     ascii_grid_lookup = np.genfromtxt(grid_ascii_file,delimiter=' ',  skip_header=6)
     ascii_header='nrows %s \nncols %s \nyllcorner %s \nxllcorner %s \ncellsize 500.0 \nnodata_value -9999.00' % (n500rows,n500cols,yll500,xll500)
 
- #    print( ' Reading in cultch map for Oyster HSI')
-    
     
 # generate some dictionaries from the Hydro output files - these combine the monthly output from hydro into mean values for various time frames (e.g. annual, April-July, etc)
 # other input values that are used by specific HSIs will be written and deleted within the respective HSIs to minimize memory requirements
@@ -152,12 +150,10 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         gridID = int(new_veg[n][0])
         
         # use landdict to assign portion of cell that is water - this value is the updated land/water ratio AFTER the Morph run, 'WATER' value from Veg output is not needed here
-        # Floating marsh Veg output was used to update land/water in WM.ImportVegResults()
-        # Dead floating marsh output is classified as water in landdict
-        # Live floating marsh output is included in the total percent land in landdict
-       
+        # landdict is bare land, vegetated land, and upland - it does not include water or floating marsh
+
+# check that percent land is Data (-9999 if NoData), if NoData, set water area to zero
 #        try:
-            # check that percent land is Data (-9999 if NoData), if NoData, set water area to zero
 #            if landdict[gridID] >= 0:
 #                waterdict[gridID] = 100 - landdict[gridID]
 #            else:
@@ -165,51 +161,39 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 #        except:
 #            waterdict[gridID] = 0
         
-        # set initial dictionary values to zero for current gridID
-        wetlndict[gridID] = 0.0     # percent of cell that has wetland (all non-floating types)
-        frattdict[gridID] = 0.0     # percent of cell that has fresh wetland (non-floating types)
-        frfltdict[gridID] = 0.0     # percent of cell that has fresh floating marsh
-        interdict[gridID] = 0.0     # percent of cell that has intermediate wetland
-        brackdict[gridID] = 0.0     # percent of cell that has brackish wetland
-        salmardict[gridID] = 0.0    # percent of cell that has saline wetland
-        swfordict[gridID] = 0.0     # percent of cell that has swamp forest wetland (same as swamp forest - LULC reclass doesn't differentiate between the two)
-        btfordict[gridID] = 0.0     # percent of cell that has bottomland  forest (same as swamp forest - LULC reclass doesn't differentiate between the two)
-        watsavdict[gridID] = 0.0    # percent of cell that has subaquatic vegetation
-        baldcypdict[gridID] = 0.0 
-        marshelderdict[gridID] = 0.0
-        blackmangrovedict[gridID] = 0.0
-        baredict[gridID] = 0.0
-        bare_mult[gridID] = 1.0
-        fresh_for_mult[gridID] = 1.0
+        pland = landdict[gridID]/100.0
         
+        # pland is the percentage of the grid cell that is land (as calculated by ICM-Morph)
+        # the pL_XX values included in the ICM-LAVegMod output files are the 'portion of land that is habitat type X'
+        # these pL_XX values in ICM-LAVegMod are the respective portion of VEGETATED LAND covered by habitat type - so water, NotMod, and Bareground are excluded from pL_XX calculations
+        btfordict[gridID]           = pland*new_veg[n][vegtypenames.index('pL_BF')]             # % Bottomland Hardwood Forest
+        swfordict[gridID]           = pland*new_veg[n][vegtypenames.index('pL_SF')]             # % Bottomland Hardwood Forest
+        frattdict[gridID]           = pland*new_veg[n][vegtypenames.index('pL_FM')]             # % Fresh Herbaceous Marsh
+        interdict[gridID]           = pland*new_veg[n][vegtypenames.index('pL_IM')]             # % Intermediate Herbaceous marsh
+        brackdict[gridID]           = pland*new_veg[n][vegtypenames.index('pL_BM')]             # % Brackish Herbaceous Marsh
+        salmardict[gridID]          = pland*new_veg[n][vegtypenames.index('pL_SM')]             # % Saline Herbaceous Marsh                
+        watsavdict[gridID]          = pland*new_veg[n][vegtypenames.index('SAV')]               # Subaqauatic vegetation LULC
+        baldcypdict[gridID]         = pland*new_veg[n][vegtypenames.index('TADI2')]             # % Bald cypress
+        blackmangrovedict[gridID]   = pland*new_veg[n][vegtypenames.index('AVGE')]              # % Black mangrove
+        marshelderdict[gridID]      = pland*new_veg[n][vegtypenames.index('IVFR')]              # % Marsh elder
+        frfltdict[gridID]           = pland*( new_veg[n][vegtypenames.index('ELBA2_Flt')]       \
+                                            + new_veg[n][vegtypenames.index('PAHE2_Flt')] )     # Live floating marsh LULC
+        baredict[gridID]            = pland*( new_veg[n][vegtypenames.index('BAREGRND_Flt')]    \
+                                            + new_veg[n][vegtypenames.index('BAREGRND_OLD')]    \
+                                            + new_veg[n][vegtypenames.index('BAREGRND_NEW')] )  # % Bareground
+        wetlndict[gridID]           = 1.0 - ( baredict[gridID]                                  \
+                                            + new_veg[n][vegtypenames.index('WATER')]           \
+                                            + new_veg[n]+[vegtypenames.index('NOTMOD')] )       # % Marsh Wetland (all types)
+
+                
         # set land multiplier to zero for grid cells that are 100% land
         if waterdict[gridID] == 0.0:
             land_mult[gridID] = 0.0
         else:
             land_mult[gridID] = 1.0
-    
-        # loop through Veg output and add percent cover to the respective wetland type dictionaries
-        
-        
-        
-        
-        btfordict[gridID]           = new_veg[n][vegtypenames.index('pL_BF')]             # % Bottomland Hardwood Forest
-        swfordict[gridID]           = new_veg[n][vegtypenames.index('pL_SF')]             # % Bottomland Hardwood Forest
-        frattdict[gridID]           = new_veg[n][vegtypenames.index('pL_FM')]             # % Fresh Herbaceous Marsh
-        interdict[gridID]           = new_veg[n][vegtypenames.index('pL_IM')]             # % Intermediate Herbaceous marsh
-        brackdict[gridID]           = new_veg[n][vegtypenames.index('pL_BM')]             # % Brackish Herbaceous Marsh
-        salmardict[gridID]          = new_veg[n][vegtypenames.index('pL_SM')]            # % Saline Herbaceous Marsh                
-        watsavdict[gridID]          = new_veg[n][vegtypenames.index('SAV')]              # Subaqauatic vegetation LULC
-        frfltdict[gridID]           = new_veg[n][FLT1 + FLT 2]                            # Live floating marsh LULC
-        baredict[gridID]            = new_veg[n][ NEW + OLD + BARE_flT]                    # % Bareground
-        baldcypdict[gridID]         = new_veg[n][vegtypenames.index('TADI2')]           # % Bald cypress
-        blackmangrovedict[gridID]   = new_veg[n][vegtypenames.index('AVGE')]      # % Black mangrove
-        marshelderdict[gridID]      = new_veg[n][vegtypenames.index('IVFR')]         # % Marsh elder
-        wetlndict[gridID]           = frattdict[gridID] + interdict[gridID] + brackdict[gridID] + salmardict[gridID] + frfltdict[gridID]  # % Marsh Wetland (all types)
-        
-# Check for bareground                 
-# if there is no wetland or forest type, but there is bareground, set bareground multiplier to zero
-
+      
+# Check for bareground - if there is no wetland or forest type, but there is bareground, set bareground multiplier to zero
+        bare_mult[gridID] = 1.0
         if baredict[gridID] > 0.0:
             if wetlndict[gridID] == 0.0:
                 if btfordict[gridID] == 0.0:
@@ -224,24 +208,27 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
                 swfordict[gridID] += baredict[gridID]
 
 # if fresh forest is present and greater than wetland area, set fresh forest multiplier to zero
+        fresh_for_mult[gridID] = 1.0
         if btfordict[gridID] > 0.0:
             if btfordict[gridID] > wetlndict[gridID]:
                 fresh_for_mult[gridID] = 0.0
 
 
-# convert marsh/land type dictionaries from ratio to percentage    
+# convert marsh/land type dictionaries from portion (0-1) to percentage (0-100)
     for gridID in gridIDs:
-        wetlndict[gridID] =  max(0.0,min(100.0,100.0*wetlndict[gridID]))
-        btfordict[gridID] =  max(0.0,min(100.0,100.0*btfordict[gridID]))
-        swfordict[gridID] =  max(0.0,min(100.0,100.0*swfordict[gridID]))
-        frattdict[gridID] =  max(0.0,min(100.0,100.0*frattdict[gridID]))
-        interdict[gridID] =  max(0.0,min(100.0,100.0*interdict[gridID]))
-        brackdict[gridID] =  max(0.0,min(100.0,100.0*brackdict[gridID]))
-        salmardict[gridID] = max(0.0,min(100.0,100.0*salmardict[gridID]))
-        watsavdict[gridID] = max(0.0,min(100.0,100.0*watsavdict[gridID]))
-        frfltdict[gridID] =  max(0.0,min(100.0,100.0*frfltdict[gridID]))
-        baldcypdict[gridID]= max(0.0,min(100.0,100.0*baldcypdict[gridID]))
-
+        wetlndict[gridID]   =  max(0.0,min(100.0,100.0*wetlndict[gridID]))
+        btfordict[gridID]   =  max(0.0,min(100.0,100.0*btfordict[gridID]))
+        swfordict[gridID]   =  max(0.0,min(100.0,100.0*swfordict[gridID]))
+        frattdict[gridID]   =  max(0.0,min(100.0,100.0*frattdict[gridID]))
+        interdict[gridID]   =  max(0.0,min(100.0,100.0*interdict[gridID]))
+        brackdict[gridID]   =  max(0.0,min(100.0,100.0*brackdict[gridID]))
+        salmardict[gridID]  =  max(0.0,min(100.0,100.0*salmardict[gridID]))
+        watsavdict[gridID]  =  max(0.0,min(100.0,100.0*watsavdict[gridID]))
+        frfltdict[gridID]   =  max(0.0,min(100.0,100.0*frfltdict[gridID]))
+        baldcypdict[gridID] =  max(0.0,min(100.0,100.0*baldcypdict[gridID]))
+ 
+        
+        
     ########################################
     ##       Juvenile Blue Crab HSI       ##
     ########################################
