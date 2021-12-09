@@ -192,44 +192,20 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         
         
         
-        # % Bottomland Hardwood Forest
-        btfordict[gridID] = new_veg[n][vegtypenames.index('pL_BF')]
         
-        # % Bottomland Hardwood Forest
-        swfordict[gridID] = new_veg[n][vegtypenames.index('pL_SF')]
-            
-        # % Fresh Herbaceous Marsh
-        frattdict[gridID] = new_veg[n][vegtypenames.index('pL_FM')]
-        
-        # % Intermediate Herbaceous marsh
-        interdict[gridID] = new_veg[n][vegtypenames.index('pL_IM')]
-
-        # % Brackish Herbaceous Marsh
-        brackdict[gridID] = new_veg[n][vegtypenames.index('pL_BM')]
-        
-        # % Saline Herbaceous Marsh                
-        salmardict[gridID] = new_veg[n][vegtypenames.index('pL_SM')]
-        
-        # Subaqauatic vegetation LULC
-        watsavdict[gridID] = new_veg[n][vegtypenames.index('SAV')]
-        
-        # Live floating marsh LULC                
-        frfltdict[gridID] = new_veg[n][FLT1 + FLT 2]
-        
-        # % Bareground
-        baredict[gridID] = new_veg[n][ NEW + OLD + BARE_flT]
-         
-        # % Bald cypress
-        baldcypdict[gridID] = new_veg[n][vegtypenames.index('TADI2')]
-            
-        # % Black mangrove
-        blackmangrovedict[gridID] = new_veg[n][vegtypenames.index('AVGE')]
-            
-        # % Marsh elder
-        marshelderdict[gridID] = new_veg[n][vegtypenames.index('IVFR')]
-
-        # % Marsh Wetland (all types)
-        wetlndict[gridID] = frattdict[gridID] + interdict[gridID] + brackdict[gridID] + salmardict[gridID] + frfltdict[gridID]
+        btfordict[gridID]           = new_veg[n][vegtypenames.index('pL_BF')]             # % Bottomland Hardwood Forest
+        swfordict[gridID]           = new_veg[n][vegtypenames.index('pL_SF')]             # % Bottomland Hardwood Forest
+        frattdict[gridID]           = new_veg[n][vegtypenames.index('pL_FM')]             # % Fresh Herbaceous Marsh
+        interdict[gridID]           = new_veg[n][vegtypenames.index('pL_IM')]             # % Intermediate Herbaceous marsh
+        brackdict[gridID]           = new_veg[n][vegtypenames.index('pL_BM')]             # % Brackish Herbaceous Marsh
+        salmardict[gridID]          = new_veg[n][vegtypenames.index('pL_SM')]            # % Saline Herbaceous Marsh                
+        watsavdict[gridID]          = new_veg[n][vegtypenames.index('SAV')]              # Subaqauatic vegetation LULC
+        frfltdict[gridID]           = new_veg[n][FLT1 + FLT 2]                            # Live floating marsh LULC
+        baredict[gridID]            = new_veg[n][ NEW + OLD + BARE_flT]                    # % Bareground
+        baldcypdict[gridID]         = new_veg[n][vegtypenames.index('TADI2')]           # % Bald cypress
+        blackmangrovedict[gridID]   = new_veg[n][vegtypenames.index('AVGE')]      # % Black mangrove
+        marshelderdict[gridID]      = new_veg[n][vegtypenames.index('IVFR')]         # % Marsh elder
+        wetlndict[gridID]           = frattdict[gridID] + interdict[gridID] + brackdict[gridID] + salmardict[gridID] + frfltdict[gridID]  # % Marsh Wetland (all types)
         
 # Check for bareground                 
 # if there is no wetland or forest type, but there is bareground, set bareground multiplier to zero
