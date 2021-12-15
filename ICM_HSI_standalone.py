@@ -104,6 +104,8 @@ import datetime as dt
 
 HSI_standalone = True
 
+par_dir = os.getcwd()
+
 inputs = np.genfromtxt('ICM_control.csv',dtype=str,comments='#',delimiter=',')
 
 # Parent directory locations for various ICM components
