@@ -46,7 +46,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     e = 2.718281828
     jan,feb,mar,apr,may,jun,jul,aug,sep,octb,nov,dec = 0,1,2,3,4,5,6,7,8,9,10,11
    
-    grid_ascii_file = os.path.normpath(HSI_dir + '\\hsi_grid_ecoregion.asc')    
+    grid_ascii_file = os.path.normpath(vegetation_dir + '/veg_grid_.asc')    
     print( ' Reading in ASCII grid template.')
 
     ascii_grid_lookup = np.genfromtxt(grid_ascii_file,delimiter=' ',  skip_header=6)
