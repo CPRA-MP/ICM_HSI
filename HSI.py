@@ -39,8 +39,8 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     # set some general variables
     print( ' Setting up HSI runs.')
 
-    asc_outprefix = r'%s\\output_%02d\\Deliverables\\%s_O_%02d_%02d_X_' % (wetland_morph_dir,elapsedyear,runprefix,elapsedyear,elapsedyear)
-    csv_outprefix = r'%s\\%s_O_%02d_%02d_X_' % (HSI_dir,runprefix,elapsedyear,elapsedyear)
+    asc_outprefix = '%s/%s_O_%02d_%02d_X_' % (HSI_dir,runprefix,elapsedyear,elapsedyear)
+    csv_outprefix = '%s/%s_O_%02d_%02d_X_' % (HSI_dir,runprefix,elapsedyear,elapsedyear)
     
 
     e = 2.718281828
