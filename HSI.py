@@ -35,6 +35,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     import os
     import csv
     import code
+    import math
 
     # set some general variables
     print( ' Setting up HSI runs.')
@@ -46,11 +47,11 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     e = 2.718281828
     jan,feb,mar,apr,may,jun,jul,aug,sep,octb,nov,dec = 0,1,2,3,4,5,6,7,8,9,10,11
    
-    grid_ascii_file = os.path.normpath(vegetation_dir + '/veg_grid_.asc')    
+    grid_ascii_file = os.path.normpath(vegetation_dir + '/veg_grid.asc')    
     print( ' Reading in ASCII grid template.')
 
     ascii_grid_lookup = np.genfromtxt(grid_ascii_file,delimiter=' ',  skip_header=6)
-    ascii_header='nrows %s \nncols %s \nyllcorner %s \nxllcorner %s \ncellsize 500.0 \nnodata_value -9999.00' % (n500rows,n500cols,yll500,xll500)
+    ascii_header='nrows %s \nncols %s \nyllcorner %s \nxllcorner %s \ncellsize 480.0 \nnodata_value -9999.00' % (n500rows,n500cols,yll500,xll500)
 
     
 # generate some dictionaries from the Hydro output files - these combine the monthly output from hydro into mean values for various time frames (e.g. annual, April-July, etc)
@@ -172,7 +173,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         interdict[gridID]           = pland*new_veg[n][vegtypenames.index('pL_IM')]             # % Intermediate Herbaceous marsh
         brackdict[gridID]           = pland*new_veg[n][vegtypenames.index('pL_BM')]             # % Brackish Herbaceous Marsh
         salmardict[gridID]          = pland*new_veg[n][vegtypenames.index('pL_SM')]             # % Saline Herbaceous Marsh                
-        watsavdict[gridID]          = pland*new_veg[n][vegtypenames.index('SAV')]               # Subaqauatic vegetation LULC
+        watsavdict[gridID]          = 0.0#pland*new_veg[n][vegtypenames.index('SAV')]               # Subaqauatic vegetation LULC
         baldcypdict[gridID]         = pland*new_veg[n][vegtypenames.index('TADI2')]             # % Bald cypress
         blackmangrovedict[gridID]   = pland*new_veg[n][vegtypenames.index('AVGE')]              # % Black mangrove
         marshelderdict[gridID]      = pland*new_veg[n][vegtypenames.index('IVFR')]              # % Marsh elder
@@ -183,7 +184,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
                                             + new_veg[n][vegtypenames.index('BAREGRND_NEW')] )  # % Bareground
         wetlndict[gridID]           = 1.0 - ( baredict[gridID]                                  \
                                             + new_veg[n][vegtypenames.index('WATER')]           \
-                                            + new_veg[n]+[vegtypenames.index('NOTMOD')] )       # % Marsh Wetland (all types)
+                                            + new_veg[n][vegtypenames.index('NOTMOD')] )       # % Marsh Wetland (all types)
 
                 
         # set land multiplier to zero for grid cells that are 100% land
@@ -210,6 +211,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 # if fresh forest is present and greater than wetland area, set fresh forest multiplier to zero
         fresh_for_mult[gridID] = 1.0
         if btfordict[gridID] > 0.0:
+           # print('g:',gridID,'b:',btfordict[gridID],'w:',wetlndict[gridID])
             if btfordict[gridID] > wetlndict[gridID]:
                 fresh_for_mult[gridID] = 0.0
 
@@ -237,7 +239,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     
     # read in GAMM lookup table for sal/temp combinations
     blucj_gamm_seine = {}
-    blucj_seine_file = os.path.normpath(r'%s\seine_bluecrab_gamm_table_1dec.txt' % HSI_dir)
+    blucj_seine_file = os.path.normpath('%s/seine_bluecrab_gamm_table_1dec.txt' % HSI_dir)
     gamm_table_delimiter = '\t' #','
     with open(blucj_seine_file) as tf:
         nline = 0
@@ -385,7 +387,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 
     # read in GAMM lookup table for sal/temp combinations for juv menhaden 
     gmenj_gamm_seine = {}
-    gmenj_seine_file = os.path.normpath(r'%s\seine_gulfmenhaden_gamm_table_1dec.txt' % HSI_dir)
+    gmenj_seine_file = os.path.normpath('%s/seine_gulfmenhaden_gamm_table_1dec.txt' % HSI_dir)
     gamm_table_delimiter = '\t' #','
     with open(gmenj_seine_file) as tf:
         nline = 0
@@ -444,7 +446,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 
         # check for error in imported GAMM lookup table values - if sal/temp combination was not in table (or there is a precision mismatch), do not calculate HSI and report out error flag of -9999
             if S1j == -9999:    
-                HSI_juvMenh = -9999
+                HSI_juvMenh = 101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#101#-9999
             else:
                 HSI_juvMenh = zero_mult*(S1j*S2j)**(1./2.)
             
@@ -459,7 +461,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     #########################################
 
     gmena_gamm_gilln = {}
-    gmena_gilln_file = os.path.normpath(r'%s\gillnet_gulfmenhaden_gamm_table_1dec.txt' % HSI_dir)
+    gmena_gilln_file = os.path.normpath('%s/gillnet_gulfmenhaden_gamm_table_1dec.txt' % HSI_dir)
     gamm_table_delimiter = '\t' #','
     with open(gmena_gilln_file) as tf:
         nline = 0
@@ -770,7 +772,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 
     # read in GAMM lookup table for sal/temp combinations for juv and adult spotted seatrout
     sstrtj_gamm_seine = {}
-    sstrtj_seine_file = os.path.normpath(r'%s\seine_spottedseatrout_gamm_table_1dec.txt' % HSI_dir)
+    sstrtj_seine_file = os.path.normpath('%s/seine_spottedseatrout_gamm_table_1dec.txt' % HSI_dir)
     gamm_table_delimiter = '\t' #','
     with open(sstrtj_seine_file) as tf:
         nline = 0
@@ -844,7 +846,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     #########################################
 
     sstrta_gamm_gilln = {}
-    sstrta_gilln_file = os.path.normpath(r'%s\gillnet_spottedseatrout_gamm_table_1dec.txt' % HSI_dir)
+    sstrta_gilln_file = os.path.normpath('%s/gillnet_spottedseatrout_gamm_table_1dec.txt' % HSI_dir)
     gamm_table_delimiter = '\t' #','
     with open(sstrta_gilln_file) as tf:
         nline = 0
@@ -1038,7 +1040,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     ###         MOTTLED DUCK HSI         ##
     #######################################
     # This HSI assumes is coded based on the depth tables generated by WM.HSIreclass provide depth in centimeters
-    MotDuckCSV = os.path.normpath("%s\\MotDuckDepths_cm_%s.csv" % (HSI_dir,year))
+    MotDuckCSV = os.path.normpath("%s/MotDuckDepths_cm_%s.csv" % (HSI_dir,year))
    
     print( ' Calculating Mottled Duck HSI')
     MotDuck = np.genfromtxt(MotDuckCSV,delimiter = ',',  skip_header = 1)
@@ -1155,7 +1157,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     ###           GADWALL HSI            ##
     #######################################
     # This HSI assumes is coded based on the depth tables generated by WM.HSIreclass provide depth in centimeters
-    GadwallCSV = os.path.normpath("%s\\GadwallDepths_cm_%s.csv" % (HSI_dir,year))
+    GadwallCSV = os.path.normpath("%s/GadwallDepths_cm_%s.csv" % (HSI_dir,year))
     
     print( ' Calculating Gadwall HSI')
     Gadwall = np.genfromtxt(GadwallCSV,delimiter = ',',  skip_header = 1)
@@ -1374,181 +1376,6 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 ## delete temporary variables so they do not accidentally get used in other HSIs
 #    del(area,v1a,v1b,v1c,v1d,v1e,v1f,v1g,v2,v3a,v3b,v3c,v3d,v3e,v3f,v3g,S1,S2,S3)
 #
-    #######################################
-    ###         BROWN PELICAN HSI        ##
-    #######################################
-    print( ' Calculating Brown Pelican HSI')
-    
-    HSIcsv = r'%sBRWNP_noGMENA.csv' % csv_outprefix
-    HSIasc = r'%sBRWNP_noGMENA.asc' % asc_outprefix
-    
-    HSIcsv2 = r'%sBRWNP.csv' % csv_outprefix
-    HSIasc2 = r'%sBRWNP.asc' % asc_outprefix
-   
-    bpel_input_file = 'BrownPelican_HSI_inputs_%02d.csv' % elapsedyear 
-    BP_inputs = np.genfromtxt(bpel_input_file,  skip_header=1,delimiter=',')
-    
-    distancemultiplier = {}
-    saltmarsh_islandarea_m2 = {}
-   
-    for n in range(0,len(BP_inputs)):
-        gridIDinBP = BP_inputs[n][0]
-        saltmarsh_islandarea_m2[gridIDinBP] = BP_inputs[n][1]
-        distancemultiplier[gridIDinBP] = BP_inputs[n][2]
-   
-#    del BP_inputs
-           
-    with open(HSIcsv,'w') as fBP:
-        
-        headerstring = 'GridID,HSI,area_ha,s1,s2,v3,s3,s4,s5,s6\n'
-        fBP.write(headerstring)
-
-        for gridID in gridIDs:
-            S1 = 0.0
-            
-            try:
-                area_ha = saltmarsh_islandarea_m2[gridID]/10000.0
-            except:
-                area_ha = 0.0             
-            
-    # if there is no area value, there is no small island with salt marsh present in grid cell - set HSI to zero
-    #if area_ha <= 0.0: # update this lower value to 25 ha  - if island is smaller than one 500mx500m grid, HSI is zero # fix for alternative runs
-                if area_ha <= 25.0:
-                    HSI_BP = 0.0
-                    S1 = -9999
-                    S2 = -9999
-                    v3 = -9999
-                    S4 = -9999
-                    S5 = -9999
-                    S6 = -9999
-                elif area_ha > 25.0 and area_ha <= 180.0:
-                    S1 = 1.0
-                elif area_ha > 180.0 and area_ha <= 200.0:
-                    S1 = 10.0 - 0.05*area_ha
-    # if the island area is larger than 200 ha, island is too large - set HSI to zero
-                elif area_ha > 200.0:
-                    HSI_BP = 0.0
-                    S1 = -9999
-                    S2 = -9999
-                    v3 = -9999
-                    S4 = -9999
-                    S5 = -9999
-                    S6 = -9999
-    # otherwise first S term is function of island size
- #               else:
- #                   if area_ha <= 180.0:
- #                       S1 = 1.0
- #                   elif area_ha > 180.0 and area_ha <= 200.0:
- #                       S1 = 10.0 - 0.05*area_ha
-                    
-    # if there is a distance multiplier value for the grid cell, use, otherwise set to zero so no HSI is calculated
-    # if small island is within 1.0 km of land, multiplier = 0
-    # if small island is within 1.5 km of land, multiplier = 0.2
-    # if small island is within 2.0 km of land, multiplier = 0.4
-    # if small island is within 2.5 km of land, multiplier = 0.6
-    # if small island is within 3.0 km of land, multiplier = 0.8
-    # if small island is more than 3.0 km from land, multiplier = 1.0
-            try:
-                S2 = distancemultiplier[gridID]
-            except:
-                S2 = 0.0
-                
-            try: 
-                v3bm = blackmangrovedict[gridID]
-            except:
-                v3bm = 0.0
-                
-            try:
-                v3me = marshelderdict[gridID]
-            except:
-                v3me = 0.0
-                    
-            v3 = min(max(0.0,v3bm + v3me),1.0)
-            if v3 >= 0.5:
-                S3 = 1.0
-            else:
-                S3 = 1.6*v3 + 0.2
-                    
-    # S4 is distance to human activity - this data is not in the model, but the 500-m grid structure excludes developed areas, therefore it is not included in this HSI code 
-            S4 = 1.0
-               
-    # S5 is menhaden HSI value withing 20km radius  - this is added after mapped to ASCII grid
-            S5 = 1.0                
-    # S6 is the dominant emergent vegetation type - this term is zero for all types EXCEPT salt marsh
-    # when island sizes are calculated in WM.HSIpelican() function, the output areas are only calculated for islands that have some salt marsh
-    # therefore this term is set to 1 in this equation since the area term will be zero for non-salt marsh areas
-            S6 = 1.0
-                
-            HSI_BP = (S1*S2*S3*S4*S5*S6)**(1./6.)
-                
-            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_BP,area_ha,S1,S2,v3,S3,S4,S5,S6) 
-            fBP.write(writestring)
-
-    # map pelican HSI to Ascii grid without Menhaden habitat values
-        HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
-    
-    print( ' Re-calculating Brown Pelican HSI with Menhaden')
-    
-    with open(HSIcsv2,'w') as fBP2:
-        
-        headerstring = 'GridID,HSI,area_ha,distance_multiplier,v3,s4,s5,s6\n'
-        fBP2.write(headerstring)
-
-        menhaden_asci = r'%sGMENA.asc' % asc_outprefix
-        
-        men = np.genfromtxt(menhaden_asci,delimiter=" ",  skip_header=6)
-        pelcsv = np.genfromtxt(HSIcsv,delimiter=",",  skip_header=1)
-        peldict = dict((pelcsv[n][0],pelcsv[n][1:7])for n in range(0,len(pelcsv)))
-
-#        pelHSInoMen = 0.0   # Shaye added - set variable upfront and will be overwritten in m, n loop 
-
-        newHSIgrid = np.zeros([n500rows,n500cols])
-        for m in range(0,n500rows):
-            for n in range(0,n500cols):
-                cellID = ascii_grid_lookup[m][n]
-                if cellID == -9999:
-                    newHSIgrid[m][n] = -9999 
-                else:
-                    pelHSInoMen = peldict[cellID][0] 
-                    area_ha = peldict[cellID][1]
-                    S2 = peldict[cellID][2]
-                    v3 = peldict[cellID][3]
-                    S4 = peldict[cellID][4]
-                    S6 = peldict[cellID][5]
-                    
-                    if pelHSInoMen == 0.0:
-                        newHSIgrid[m][n] = 0.0
-    # if grid cell has data and a non-zero pelican HSI, loop over surrounding cells and determine average adult menhaden HSI
-                    else:
-                        menave = 0
-                        avecells_n = 0
-                        S5 = 0.0
-    # look at all cells 35 rows and 35 columns away from current grid cell
-    # this 71 grid cell wide surrounding area is equal to 1260.5 sq km, which is equivalent to the 20-km search radius that brown pelicans have, which is 1256.6 sq km
-                        for mm in range(-35,36):
-                            newrow = m + mm
-                            for nn in range(-35,36):    
-                                newcol = n + nn
-                                surroundcell = ascii_grid_lookup[newrow][newcol]
-                                if surroundcell != -9999:     #  Eric: Shaye changed <> to !=
-                                    menave += men[newrow][newcol]
-                                    avecells_n += 1
-                                    if avecells_n != 0:
-                                        V5 = (menave/avecells_n)**(1./6.)
-                                    else:
-                                        V5 = 0.0
-                                        if V5 >= 0.6:
-                                            S5 = 1.0
-                                        else:
-                                            S5 = V5*5./3.
-#                            
-                        newHSIgrid[m][n] = pelHSInoMen*(menave/avecells_n)**(1./6.)
-                    
-                        writestring = '%s,%s,%s,%s,%s,%s,%s,%s\n' %(cellID,newHSIgrid[m][n],area_ha,S2,v3,S4,S5,S6) 
-                        fBP2.write(writestring)
-                
-        HSIascii_grid(HSIcsv2,HSIasc2,ascii_grid_lookup,n500cols,n500rows,ascii_header)       
-                            
 
     #############################
     ###      CRAWFISH HSI      ##
@@ -1804,7 +1631,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             if v1a == 0.0:
                 S1 = 0.01
             else:
-                S1 = 0.408 - 0.142*log(v1a)
+                S1 = 0.408 - 0.142*math.log(v1a)
 
     # for fresh marsh habitat percent cover
             S2 = 0.370 + 0.070*v1b - 2.655e-3*(v1b)**2.0 + 3.691e-5*(v1b)**3.0 - 1.701e-7*(v1b)**4.0
@@ -1839,3 +1666,182 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
 
     del(wat,v1a,v1b,v1c,v1d,v1e,v1f,frst,S1,S2,S3,S4,S5,S6)
+
+#skip#    #######################################
+#skip#    ###         BROWN PELICAN HSI        ##
+#skip#    #######################################
+#skip#    print( ' Calculating Brown Pelican HSI')
+#skip#    
+#skip#    HSIcsv = r'%sBRWNP_noGMENA.csv' % csv_outprefix
+#skip#    HSIasc = r'%sBRWNP_noGMENA.asc' % asc_outprefix
+#skip#    
+#skip#    HSIcsv2 = r'%sBRWNP.csv' % csv_outprefix
+#skip#    HSIasc2 = r'%sBRWNP.asc' % asc_outprefix
+#skip#   
+#skip#    bpel_input_file = 'BrownPelican_HSI_inputs_%02d.csv' % elapsedyear 
+#skip#    BP_inputs = np.genfromtxt(bpel_input_file,  skip_header=1,delimiter=',')
+#skip#    
+#skip#    distancemultiplier = {}
+#skip#    saltmarsh_islandarea_m2 = {}
+#skip#   
+#skip#    for n in range(0,len(BP_inputs)):
+#skip#        gridIDinBP = BP_inputs[n][0]
+#skip#        saltmarsh_islandarea_m2[gridIDinBP] = BP_inputs[n][1]
+#skip#        distancemultiplier[gridIDinBP] = BP_inputs[n][2]
+#skip#   
+#skip##    del BP_inputs
+#skip#           
+#skip#    with open(HSIcsv,'w') as fBP:
+#skip#        
+#skip#        headerstring = 'GridID,HSI,area_ha,s1,s2,v3,s3,s4,s5,s6\n'
+#skip#        fBP.write(headerstring)
+#skip#
+#skip#        for gridID in gridIDs:
+#skip#            S1 = 0.0
+#skip#            
+#skip#            try:
+#skip#                area_ha = saltmarsh_islandarea_m2[gridID]/10000.0
+#skip#            except:
+#skip#                area_ha = 0.0             
+#skip#            
+#skip#    # if there is no area value, there is no small island with salt marsh present in grid cell - set HSI to zero
+#skip#    #if area_ha <= 0.0: # update this lower value to 25 ha  - if island is smaller than one 500mx500m grid, HSI is zero # fix for alternative runs
+#skip#                if area_ha <= 25.0:
+#skip#                    HSI_BP = 0.0
+#skip#                    S1 = -9999
+#skip#                    S2 = -9999
+#skip#                    v3 = -9999
+#skip#                    S4 = -9999
+#skip#                    S5 = -9999
+#skip#                    S6 = -9999
+#skip#                elif area_ha > 25.0 and area_ha <= 180.0:
+#skip#                    S1 = 1.0
+#skip#                elif area_ha > 180.0 and area_ha <= 200.0:
+#skip#                    S1 = 10.0 - 0.05*area_ha
+#skip#    # if the island area is larger than 200 ha, island is too large - set HSI to zero
+#skip#                elif area_ha > 200.0:
+#skip#                    HSI_BP = 0.0
+#skip#                    S1 = -9999
+#skip#                    S2 = -9999
+#skip#                    v3 = -9999
+#skip#                    S4 = -9999
+#skip#                    S5 = -9999
+#skip#                    S6 = -9999
+#skip#    # otherwise first S term is function of island size
+#skip# #               else:
+#skip# #                   if area_ha <= 180.0:
+#skip# #                       S1 = 1.0
+#skip# #                   elif area_ha > 180.0 and area_ha <= 200.0:
+#skip# #                       S1 = 10.0 - 0.05*area_ha
+#skip#                    
+#skip#    # if there is a distance multiplier value for the grid cell, use, otherwise set to zero so no HSI is calculated
+#skip#    # if small island is within 1.0 km of land, multiplier = 0
+#skip#    # if small island is within 1.5 km of land, multiplier = 0.2
+#skip#    # if small island is within 2.0 km of land, multiplier = 0.4
+#skip#    # if small island is within 2.5 km of land, multiplier = 0.6
+#skip#    # if small island is within 3.0 km of land, multiplier = 0.8
+#skip#    # if small island is more than 3.0 km from land, multiplier = 1.0
+#skip#            try:
+#skip#                S2 = distancemultiplier[gridID]
+#skip#            except:
+#skip#                S2 = 0.0
+#skip#                
+#skip#            try: 
+#skip#                v3bm = blackmangrovedict[gridID]
+#skip#            except:
+#skip#                v3bm = 0.0
+#skip#                
+#skip#            try:
+#skip#                v3me = marshelderdict[gridID]
+#skip#            except:
+#skip#                v3me = 0.0
+#skip#                    
+#skip#            v3 = min(max(0.0,v3bm + v3me),1.0)
+#skip#            if v3 >= 0.5:
+#skip#                S3 = 1.0
+#skip#            else:
+#skip#                S3 = 1.6*v3 + 0.2
+#skip#                    
+#skip#    # S4 is distance to human activity - this data is not in the model, but the 500-m grid structure excludes developed areas, therefore it is not included in this HSI code 
+#skip#            S4 = 1.0
+#skip#               
+#skip#    # S5 is menhaden HSI value withing 20km radius  - this is added after mapped to ASCII grid
+#skip#            S5 = 1.0                
+#skip#    # S6 is the dominant emergent vegetation type - this term is zero for all types EXCEPT salt marsh
+#skip#    # when island sizes are calculated in WM.HSIpelican() function, the output areas are only calculated for islands that have some salt marsh
+#skip#    # therefore this term is set to 1 in this equation since the area term will be zero for non-salt marsh areas
+#skip#            S6 = 1.0
+#skip#                
+#skip#            HSI_BP = (S1*S2*S3*S4*S5*S6)**(1./6.)
+#skip#                
+#skip#            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_BP,area_ha,S1,S2,v3,S3,S4,S5,S6) 
+#skip#            fBP.write(writestring)
+#skip#
+#skip#    # map pelican HSI to Ascii grid without Menhaden habitat values
+#skip#        HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
+#skip#    
+#skip#    print( ' Re-calculating Brown Pelican HSI with Menhaden')
+#skip#    
+#skip#    with open(HSIcsv2,'w') as fBP2:
+#skip#        
+#skip#        headerstring = 'GridID,HSI,area_ha,distance_multiplier,v3,s4,s5,s6\n'
+#skip#        fBP2.write(headerstring)
+#skip#
+#skip#        menhaden_asci = r'%sGMENA.asc' % asc_outprefix
+#skip#        
+#skip#        men = np.genfromtxt(menhaden_asci,delimiter=" ",  skip_header=6)
+#skip#        pelcsv = np.genfromtxt(HSIcsv,delimiter=",",  skip_header=1)
+#skip#        peldict = dict((pelcsv[n][0],pelcsv[n][1:7])for n in range(0,len(pelcsv)))
+#skip#
+#skip##        pelHSInoMen = 0.0   # Shaye added - set variable upfront and will be overwritten in m, n loop 
+#skip#
+#skip#        newHSIgrid = np.zeros([n500rows,n500cols])
+#skip#        for m in range(0,n500rows):
+#skip#            for n in range(0,n500cols):
+#skip#                cellID = ascii_grid_lookup[m][n]
+#skip#                if cellID == -9999:
+#skip#                    newHSIgrid[m][n] = -9999 
+#skip#                else:
+#skip#                    pelHSInoMen = peldict[cellID][0] 
+#skip#                    area_ha = peldict[cellID][1]
+#skip#                    S2 = peldict[cellID][2]
+#skip#                    v3 = peldict[cellID][3]
+#skip#                    S4 = peldict[cellID][4]
+#skip#                    S6 = peldict[cellID][5]
+#skip#                    
+#skip#                    if pelHSInoMen == 0.0:
+#skip#                        newHSIgrid[m][n] = 0.0
+#skip#    # if grid cell has data and a non-zero pelican HSI, loop over surrounding cells and determine average adult menhaden HSI
+#skip#                    else:
+#skip#                        menave = 0
+#skip#                        avecells_n = 0
+#skip#                        S5 = 0.0
+#skip#    # look at all cells 35 rows and 35 columns away from current grid cell
+#skip#    # this 71 grid cell wide surrounding area is equal to 1260.5 sq km, which is equivalent to the 20-km search radius that brown pelicans have, which is 1256.6 sq km
+#skip#                        for mm in range(-35,36):
+#skip#                            newrow = m + mm
+#skip#                            for nn in range(-35,36):    
+#skip#                                newcol = n + nn
+#skip#                                surroundcell = ascii_grid_lookup[newrow][newcol]
+#skip#                                if surroundcell != -9999:     #  Eric: Shaye changed <> to !=
+#skip#                                    menave += men[newrow][newcol]
+#skip#                                    avecells_n += 1
+#skip#                                    if avecells_n != 0:
+#skip#                                        V5 = (menave/avecells_n)**(1./6.)
+#skip#                                    else:
+#skip#                                        V5 = 0.0
+#skip#                                        if V5 >= 0.6:
+#skip#                                            S5 = 1.0
+#skip#                                        else:
+#skip#                                            S5 = V5*5./3.
+#skip##                            
+#skip#                        newHSIgrid[m][n] = pelHSInoMen*(menave/avecells_n)**(1./6.)
+#skip#                    
+#skip#                        writestring = '%s,%s,%s,%s,%s,%s,%s,%s\n' %(cellID,newHSIgrid[m][n],area_ha,S2,v3,S4,S5,S6) 
+#skip#                        fBP2.write(writestring)
+#skip#                
+#skip#        HSIascii_grid(HSIcsv2,HSIasc2,ascii_grid_lookup,n500cols,n500rows,ascii_header)       
+#skip#                            
+#skip#
+
+

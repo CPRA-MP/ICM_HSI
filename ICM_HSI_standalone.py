@@ -106,7 +106,7 @@ HSI_standalone = True
 
 par_dir = os.getcwd()
 
-inputs = np.genfromtxt('ICM_control.csv',dtype=str,comments='#',delimiter=',')
+inputs = np.genfromtxt('ICM_HSI_control.csv',dtype=str,comments='#',delimiter=',')
 
 # Parent directory locations for various ICM components
 # These directories must exist in the model folder
