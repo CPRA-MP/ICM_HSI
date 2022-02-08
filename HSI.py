@@ -1570,7 +1570,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 #           v1g = btfordict[gridID]  # bottomland forest (V1f) (same as swamp forest - LULC reclass doesn't differentiate between the two)
 
             elv_aw_m = (melevdict[gridID] - stagedict[gridID])  # marsh elevation (in m) above mean water level - negative values indicate that the marsh elevations is inundated at MWL - both melev and stage are in units of m NAVD88, so convert to cm
-#            print('gid melev stage elv', gridID, melevdict[gridID], stagedict[gridID], elv_aw_cm)
+#            print('gid melev stage elv', gridID, melevdict[gridID], stagedict[gridID], elv_aw_m)
 #            wait = input("PRESS ENTER TO CONTINUE")
 
 
@@ -1598,7 +1598,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     # map sparrow HSI to Ascii grid
         HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
 
-    del(v1a,v1b,v1c,elv_aw_cm,v2,S1,S2,S3)
+    del(v1a,v1b,v1c,elv_aw_m,v2,S1,S2,S3)
    
     #######################################
     ###         BALD EAGLE HSI           ##
