@@ -1569,7 +1569,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 #           v1f = swfordict[gridID]  # swamp forest (V1g) (same as bottomland - LULC reclass doesn't differentiate between the two)
 #           v1g = btfordict[gridID]  # bottomland forest (V1f) (same as swamp forest - LULC reclass doesn't differentiate between the two)
 
-            elv_aw_cm = (melevdict[gridID] - stagedict[gridID])*100.0  # marsh elevation (in cm) above mean water level - negative values indicate that the marsh elevations is inundated at MWL - both melev and stage are in units of m NAVD88, so convert to cm
+            elv_aw_m = (melevdict[gridID] - stagedict[gridID])  # marsh elevation (in m) above mean water level - negative values indicate that the marsh elevations is inundated at MWL - both melev and stage are in units of m NAVD88, so convert to cm
 #            print('gid melev stage elv', gridID, melevdict[gridID], stagedict[gridID], elv_aw_cm)
 #            wait = input("PRESS ENTER TO CONTINUE")
 
@@ -1584,15 +1584,15 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             else:                       
                 S2 = 1.0
 
-            if elv_aw_cm <= 0.09:   # if mean marsh elevation is less that +9 cm above mean water level
+            if elv_aw_m <= 0.09:   # if mean marsh elevation is less that +9 cm above mean water level
                 S3 = 0.0
-            elif elv_aw_cm > 0.09 and elv_aw_cm < 0.285: 
-                S3 = 5.025*elv_aw_cm - 0.452
+            elif elv_aw_m > 0.09 and elv_aw_m < 0.285: 
+                S3 = 5.025*elv_aw_m - 0.452
             else:
                 S3 = 1.0
 
             HSI_Spar = (S1*S2*S3)**(1./3.)
-            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_Spar,v1a,v1b,v1c,v2,elv_aw_cm) 
+            writestring = '%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_Spar,v1a,v1b,v1c,v2,elv_aw_m) 
             fSp.write(writestring)
 
     # map sparrow HSI to Ascii grid
