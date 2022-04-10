@@ -988,53 +988,54 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             fWSS.write(writestring)
 
 
-    ###################################################
-    #####   Large Juvenile White Shrimp HSI - Trawl  ##
-    ###################################################
+#inactive#    ###################################################
+#inactive#    #####   Large Juvenile White Shrimp HSI - Trawl  ##
+#inactive#    ###################################################
+#inactive#
+#inactive#            sa = sal_JanDec_ave[gridID]
+#inactive#            ta = tmp_JanDec_ave[gridID]
+#inactive#            v2a = v2j
+#inactive#            dayva = 179.8
+#inactive#
+#inactive#    # truncate salinity and temperature to max values - temp also is truncated at a minimum value
+#inactive#            sa_1 = min(sa,39.3)
+#inactive#            ta_1 = max(2.5,min(ta,35.3))
+#inactive#
+#inactive#    #   predictor variables are converted to z-scores using mean, sd from glmms in WQ SI memo
+#inactive#            zscst = (sa_1 - 12.89)/8.41
+#inactive#            zscsst = (sa_1**2. - 236.98)/249.53
+#inactive#            zsct1 = (ta_1 - 23.20)/6.46
+#inactive#            zsctt1 = (ta_1**2. - 579.80)/278.79
+#inactive#            
+#inactive#            lnCPUE1t = 1.57 + 0.08*zscst + 1.00*zsct1 - 0.40*zscsst - 1.27*zsctt1 - 0.24*zscst*zsct1
+#inactive#            S1a = (e**lnCPUE1t - 1.)/6.83
+#inactive#
+#inactive#            if S1a < 0.:          # if S1a is negative, set to 0.
+#inactive#                S1a = 0.
+#inactive#
+#inactive#            if v2a <= 30.:
+#inactive#                S2a = 1.
+#inactive#            else:
+#inactive#                S2a = 1.43-0.0143*v2a
+#inactive#
+#inactive#            HSI_juvWhShrT = zero_mult*(S1a*S2a)**(1./2.)   
+#inactive#                                                            
+#inactive#            writestring = '%s,%s,%s,%s,%s,%s,%s\n'  %(gridID,HSI_juvWhShrT,sa,sa_1,ta,ta_1,v2a)
+#inactive#            fWST.write(writestring)
+#inactive#       
+#inactive#         
+#inactive#    # map white shrimp trawl HSI to Ascii grid
+#inactive#        HSIascii_grid(HSIcsv2,HSIasc2,ascii_grid_lookup,n500cols,n500rows,ascii_header)           
 
-            sa = sal_JanDec_ave[gridID]
-            ta = tmp_JanDec_ave[gridID]
-            v2a = v2j
-            dayva = 179.8
-
-    # truncate salinity and temperature to max values - temp also is truncated at a minimum value
-            sa_1 = min(sa,39.3)
-            ta_1 = max(2.5,min(ta,35.3))
-
-    #   predictor variables are converted to z-scores using mean, sd from glmms in WQ SI memo
-            zscst = (sa_1 - 12.89)/8.41
-            zscsst = (sa_1**2. - 236.98)/249.53
-            zsct1 = (ta_1 - 23.20)/6.46
-            zsctt1 = (ta_1**2. - 579.80)/278.79
-            
-            lnCPUE1t = 1.57 + 0.08*zscst + 1.00*zsct1 - 0.40*zscsst - 1.27*zsctt1 - 0.24*zscst*zsct1
-            S1a = (e**lnCPUE1t - 1.)/6.83
-
-            if S1a < 0.:          # if S1a is negative, set to 0.
-                S1a = 0.
-
-            if v2a <= 30.:
-                S2a = 1.
-            else:
-                S2a = 1.43-0.0143*v2a
-
-            HSI_juvWhShrT = zero_mult*(S1a*S2a)**(1./2.)   
-                                                            
-            writestring = '%s,%s,%s,%s,%s,%s,%s\n'  %(gridID,HSI_juvWhShrT,sa,sa_1,ta,ta_1,v2a)
-            fWST.write(writestring)
-
-   # map white shrimp seine HSI to Ascii grid
-        HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)         
-         
-    # map white shrimp trawl HSI to Ascii grid
-        HSIascii_grid(HSIcsv2,HSIasc2,ascii_grid_lookup,n500cols,n500rows,ascii_header)           
-
+    # map white shrimp seine HSI to Ascii grid
+        HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
+        
     # delete any dictionaries that aren't used in any other HSIs - frees up memory
     del(sal_JunDec_ave,tmp_JunDec_ave)
 
     # delete temporary variables so they do not accidentally get used in other HSIs
     del(sj,sj_1,tj,tj_1,v2j,oysc,savc,dayvj,zscs,zscss,zsct,zsctt,lnCPUE1s,S1j,S2j)          
-    del(sa,sa_1,ta,ta_1,v2a,dayva,zscst,zscsst,zsct1,zsctt1,lnCPUE1t,S1a,S2a)        
+#inactive#    del(sa,sa_1,ta,ta_1,v2a,dayva,zscst,zscsst,zsct1,zsctt1,lnCPUE1t,S1a,S2a)        
 
     #######################################
     ###         MOTTLED DUCK HSI         ##
