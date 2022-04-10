@@ -289,7 +289,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
                
             if v2 < 25.0:
                 S2 = 0.03*v2+0.25         # note three different functions for when v2s is less than 25.
-                if oysc >= 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
+                if oysc >= 0.5:           # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
                     S2 = 0.02*v2+0.5     
                 if savc >= 20.:             
                     S2 = 0.008*v2+0.8
@@ -708,7 +708,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             elif sav2_w >= 15.0 and sav2_w < 20.0:
                 S3w = -0.04*sav2_w+0.8
             else:
-                S3w = 0.0
+                S3w = 0.001
 
             if sav2_c < 1.0:
                 S3c = 0.0
@@ -721,7 +721,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             elif sav2_c >= 15.0 and sav2_c < 20.0:
                 S3c = -0.04*sav2_c+0.8
             else:
-                S3c = 0.0
+                S3c = 0.001
 
             S3 = (S3w*S3c)**(1./2.)
 
@@ -737,7 +737,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             elif sav3 >= 20.0 and sav3 < 25.0:
                 S4 = -0.04*sav3+1.0
             else:
-                S4 = 0.0
+                S4 = 0.001
 
             S5 = 1.0 - pland
            

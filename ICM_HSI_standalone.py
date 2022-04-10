@@ -430,7 +430,7 @@ for year in range(startyear,endyear+1):
     cnp = np.genfromtxt(cultch_file,skip_header=True,usecols=(0,5),delimiter=',')
     for row in cnp:
         gid = int(row[0])
-        cultchdict[gid] = row[1]
+        cultchdict[gid] = row[1]/100.0      # cultch is used in HSI.py as a ratio from 0-1.0 so divide by 100 here to convert from percent to ratio
 
 # print statements to check all keys are imported and correct format (should all be integers)    
 #    print( len(landdict.keys()),min(landdict.keys()),max(landdict.keys()) )
