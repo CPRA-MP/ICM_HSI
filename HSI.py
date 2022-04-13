@@ -1535,8 +1535,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
                 S5 = 0.0
 
             HSI_CF = (S1*S2)**(1./6.) * S3**(1./3.) * S5**(1./3.)
-            
-            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_CF,s,depdj,depan,swampfor,fresh,wat,inter,brack)
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_CF,s,depdj,     depan,     swampfor, fresh,wat,  inter,brack)
             fCF.write(writestring)
 
     # map crawfish HSI to Ascii grid
@@ -1749,7 +1748,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 
     with open(HSIcsv,'w') as fAl:
        
-        headerstring = 'GridID,HSI,pct_wat,depth,bald,fresh,int,brack,deep,s,pct_edge\n'
+        headerstring = 'GridID,HSI,pct_wat,depth,bald,fresh,int,brack, s,pct_edge\n'
         fAl.write(headerstring)
        
         for gridID in gridIDs:
