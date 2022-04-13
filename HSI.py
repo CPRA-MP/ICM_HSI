@@ -1378,42 +1378,263 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 #    del(area,v1a,v1b,v1c,v1d,v1e,v1f,v1g,v2,v3a,v3b,v3c,v3d,v3e,v3f,v3g,S1,S2,S3)
 #
 
-    #############################
-    ###      CRAWFISH HSI      ##
-    #############################
+    ###############################################
+    ###      CRAWFISH HSI - Aug-Nov peak stage   ##
+    ###############################################
 
-    print( 'Calculating Crawfish HSI.')
+    print( 'Calculating Crawfish HSI - Aug-Nov peak stage.')
     # saving new inputs for just this HSI
 #    grid_elv_ave = {}
     stg_DecJul_ave = {}
     stg_AugNov_ave = {}
-    stg_JanAug_ave = {}
-    stg_SepDec_ave = {}
-    stg_JanSep_ave = {}
-    stg_OctDec_ave = {}
 
 
-    max_month = {}
-    for n in range(1,n500grid+1):
-        max_month[n] = -9999
-        max_stage = -9999
-        for mni in range(0,11+1):
-            if stgmdict[n][mni] > max_stage:
-                max_month[n] = mni
-             
-        
-    
-#    for gridID in gridIDs:
-#    stg_DecJul_ave[gridID] = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][dec]]))for n in range(1,n500grid+1))
-#    stg_AugNov_ave[gridID] = dict((n,np.mean([stgmndict[n][aug],stgmndict[n][sep],stgmndict[n][octb],stgmndict[n][nov]]))for n in range(1,n500grid+1))
     stg_DecJul_ave = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][dec]]))for n in range(1,n500grid+1))
     stg_AugNov_ave = dict((n,np.mean([stgmndict[n][aug],stgmndict[n][sep],stgmndict[n][octb],stgmndict[n][nov]]))for n in range(1,n500grid+1))
+   
+    
+    HSIcsv = r'%sCRAYF_aug2nov.csv' % csv_outprefix
+    HSIasc = r'%sCRAYF_aug2nov.asc' % asc_outprefix
+
+    with open(HSIcsv,'w') as fCF:
+        
+        headerstring = 'GridID,HSI,s,dep_DecJul,dep_AugNov,swamp_for,fresh,water,inter,brack\n'
+        fCF.write(headerstring)
+    
+        for gridID in gridIDs:
+            s = sal_JanDec_ave[gridID]
+            elv = grid_elv_ave[gridID]      
+            
+            if elv > -9999:
+                depdj = (stg_DecJul_ave[gridID] - elv)* 100.0
+                depan = (stg_AugNov_ave[gridID] - elv)* 100.0
+            else:
+                depdj = -9999.
+                depan = -9999.
+            
+            
+            swampfor = swfordict[gridID]
+            fresh = frattdict[gridID]+ frfltdict[gridID]
+            wat = waterdict[gridID]
+            inter = interdict[gridID]
+            brack = brackdict[gridID]
+        #sand = pctsanddict[gridID] - 2023 Update -- SES 6/18/20 - set sand and S4 to dummy values not used and to delete at end
+            sand = 999
+            
+            if s <= 1.5:
+                S1 = 1.0
+            elif s > 1.5 and s <= 3.0:
+                S1 = 1.5 - s/3.0
+            elif s > 3.0 and s <= 6.0:
+                S1 = 1 - s/6.0
+            else:
+                S1 = 0.0
+            
+            if depdj <= 0.0:
+                S2 = 0.0
+            elif depdj > 0.0 and depdj <= 46.0:
+                S2 = depdj/46.0
+            elif depdj > 46.0 and depdj <= 91.0:
+                S2 = 1.0
+            elif depdj > 91.0 and depdj <= 274.0:
+                S2 = 1.5 - 1.5*depdj/274.0
+            else:
+                S2 = 0.0    
+            
+            S3= swampfor/100.0 + 0.85*fresh/100.0 + 0.75*wat/100.0 + 0.6*inter/100.0 + 0.2*brack/100.0
+
+            S4=0.0
+
+            if depan <= 0.0:
+                S5 = 1.0
+            elif depan > 0.0 and depan <= 15.0:
+                S5 = 1.0 - depan/15.0
+            else:
+                S5 = 0.0
+
+            HSI_CF = (S1*S2)**(1./6.) * S3**(1./3.) * S5**(1./3.)
+            
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_CF,s,depdj,depan,swampfor,fresh,wat,inter,brack)
+            fCF.write(writestring)
+
+    # map crawfish HSI to Ascii grid
+        HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
+
+    del(s,depdj,depan,swampfor,fresh,wat,inter,brack,sand,S1,S2,S3,S4,S5,HSI_CF)
+    
+    ###############################################
+    ###      CRAWFISH HSI - Sep-Dec peak stage   ##
+    ###############################################
+
+    print( 'Calculating Crawfish HSI - Sep-Dec peak stage.')
+    # saving new inputs for just this HSI
+   
+    stg_JanAug_ave = {}
+    stg_SepDec_ave = {}
     
     stg_JanAug_ave = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][aug]]))for n in range(1,n500grid+1))
     stg_SepDec_ave = dict((n,np.mean([stgmndict[n][sep],stgmndict[n][octb],stgmndict[n][nov],stgmndict[n][dec]]))for n in range(1,n500grid+1))
     
+    HSIcsv = r'%sCRAYF_sep2dec.csv' % csv_outprefix
+    HSIasc = r'%sCRAYF_sep2dec.asc' % asc_outprefix
+
+    with open(HSIcsv,'w') as fCF:
+        
+        headerstring = 'GridID,HSI,s,dep_JanAug,dep_SepDec,swamp_for,fresh,water,inter,brack\n'
+        fCF.write(headerstring)
+    
+        for gridID in gridIDs:
+            s = sal_JanDec_ave[gridID]
+            elv = grid_elv_ave[gridID]      
+            
+            if elv > -9999:
+                depdj = (stg_JanAug_ave[gridID] - elv)* 100.0
+                depan = (stg_SepDec_ave[gridID] - elv)* 100.0
+            else:
+                depdj = -9999.
+                depan = -9999.
+            
+            
+            swampfor = swfordict[gridID]
+            fresh = frattdict[gridID]+ frfltdict[gridID]
+            wat = waterdict[gridID]
+            inter = interdict[gridID]
+            brack = brackdict[gridID]
+        #sand = pctsanddict[gridID] - 2023 Update -- SES 6/18/20 - set sand and S4 to dummy values not used and to delete at end
+            sand = 999
+            
+            if s <= 1.5:
+                S1 = 1.0
+            elif s > 1.5 and s <= 3.0:
+                S1 = 1.5 - s/3.0
+            elif s > 3.0 and s <= 6.0:
+                S1 = 1 - s/6.0
+            else:
+                S1 = 0.0
+            
+            if depdj <= 0.0:
+                S2 = 0.0
+            elif depdj > 0.0 and depdj <= 46.0:
+                S2 = depdj/46.0
+            elif depdj > 46.0 and depdj <= 91.0:
+                S2 = 1.0
+            elif depdj > 91.0 and depdj <= 274.0:
+                S2 = 1.5 - 1.5*depdj/274.0
+            else:
+                S2 = 0.0    
+            
+            S3= swampfor/100.0 + 0.85*fresh/100.0 + 0.75*wat/100.0 + 0.6*inter/100.0 + 0.2*brack/100.0
+
+            S4=0.0
+
+            if depan <= 0.0:
+                S5 = 1.0
+            elif depan > 0.0 and depan <= 15.0:
+                S5 = 1.0 - depan/15.0
+            else:
+                S5 = 0.0
+
+            HSI_CF = (S1*S2)**(1./6.) * S3**(1./3.) * S5**(1./3.)
+            
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_CF,s,depdj,depan,swampfor,fresh,wat,inter,brack)
+            fCF.write(writestring)
+
+    # map crawfish HSI to Ascii grid
+        HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
+
+    del(s,depdj,depan,swampfor,fresh,wat,inter,brack,sand,S1,S2,S3,S4,S5,HSI_CF)
+    
+
+    ###############################################
+    ###      CRAWFISH HSI - Oct-Dec peak stage   ##
+    ###############################################
+
+    print( 'Calculating Crawfish HSI - Oct-Dec peak stage.')
+    # saving new inputs for just this HSI
+    
+    stg_JanSep_ave = {}
+    stg_OctDec_ave = {}
+
+
     stg_JanSep_ave = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][aug],[stgmndict[n][sep]]))for n in range(1,n500grid+1))  
     stg_OctDec_ave = dict((n,np.mean(stgmndict[n][octb],stgmndict[n][nov],stgmndict[n][dec]]))for n in range(1,n500grid+1))                                                                         
+      
+    HSIcsv = r'%sCRAYF_oct2dec.csv' % csv_outprefix
+    HSIasc = r'%sCRAYF_oct2dec.asc' % asc_outprefix
+
+    with open(HSIcsv,'w') as fCF:
+        
+        headerstring = 'GridID,HSI,s,dep_JanSep,depOctDec,swamp_for,fresh,water,inter,brack\n'
+        fCF.write(headerstring)
+    
+        for gridID in gridIDs:
+            s = sal_JanDec_ave[gridID]
+            elv = grid_elv_ave[gridID]      
+            
+            if elv > -9999:
+                depdj = (stg_JanSep_ave[gridID] - elv)* 100.0
+                depan = (stg_OctDec_ave[gridID] - elv)* 100.0
+            else:
+                depdj = -9999.
+                depan = -9999.
+            
+            
+            swampfor = swfordict[gridID]
+            fresh = frattdict[gridID]+ frfltdict[gridID]
+            wat = waterdict[gridID]
+            inter = interdict[gridID]
+            brack = brackdict[gridID]
+        #sand = pctsanddict[gridID] - 2023 Update -- SES 6/18/20 - set sand and S4 to dummy values not used and to delete at end
+            sand = 999
+            
+            if s <= 1.5:
+                S1 = 1.0
+            elif s > 1.5 and s <= 3.0:
+                S1 = 1.5 - s/3.0
+            elif s > 3.0 and s <= 6.0:
+                S1 = 1 - s/6.0
+            else:
+                S1 = 0.0
+            
+            if depdj <= 0.0:
+                S2 = 0.0
+            elif depdj > 0.0 and depdj <= 46.0:
+                S2 = depdj/46.0
+            elif depdj > 46.0 and depdj <= 91.0:
+                S2 = 1.0
+            elif depdj > 91.0 and depdj <= 274.0:
+                S2 = 1.5 - 1.5*depdj/274.0
+            else:
+                S2 = 0.0    
+            
+            S3= swampfor/100.0 + 0.85*fresh/100.0 + 0.75*wat/100.0 + 0.6*inter/100.0 + 0.2*brack/100.0
+
+            S4=0.0
+
+            if depan <= 0.0:
+                S5 = 1.0
+            elif depan > 0.0 and depan <= 15.0:
+                S5 = 1.0 - depan/15.0
+            else:
+                S5 = 0.0
+
+            HSI_CF = (S1*S2)**(1./6.) * S3**(1./3.) * S5**(1./3.)
+            
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID,HSI_CF,s,depdj,depan,swampfor,fresh,wat,inter,brack)
+            fCF.write(writestring)
+
+    # map crawfish HSI to Ascii grid
+        HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header)
+
+    del(s,depdj,depan,swampfor,fresh,wat,inter,brack,sand,S1,S2,S3,S4,S5,HSI_CF)
+    
+    
+
+    ########################################################
+    ###      CRAWFISH HSI - moving window peak stage      ##
+    ########################################################
+
+    print( 'Calculating Crawfish HSI - moving window peak stage.')
 
     stg_3m__pk_ave = {}
     stg_9m_npk_ave = {}
@@ -1447,12 +1668,13 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             stg_9m_npk_ave[n] = npk9month
     
     
-    HSIcsv = r'%sCRAYF.csv' % csv_outprefix
-    HSIasc = r'%sCRAYF.asc' % asc_outprefix
+      
+    HSIcsv = r'%sCRAYF_3month.csv' % csv_outprefix
+    HSIasc = r'%sCRAYF_3month.asc' % asc_outprefix
 
     with open(HSIcsv,'w') as fCF:
         
-        headerstring = 'GridID,HSI,s,dep_DecJul,dep_AugNov,swamp_for,fresh,water,inter,brack\n'
+        headerstring = 'GridID,HSI,s,dep_9mn_nonpeak,dep_3mn_peak,swamp_for,fresh,water,inter,brack\n'
         fCF.write(headerstring)
     
         for gridID in gridIDs:
@@ -1460,8 +1682,8 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             elv = grid_elv_ave[gridID]      
             
             if elv > -9999:
-                depdj = (stg_DecJul_ave[gridID] - elv)* 100.0
-                depan = (stg_AugNov_ave[gridID] - elv)* 100.0
+                depdj = (stg_3m__pk_ave[gridID] - elv)* 100.0
+                depan = (stg_9m__npk_ave[gridID] - elv)* 100.0
             else:
                 depdj = -9999.
                 depan = -9999.
