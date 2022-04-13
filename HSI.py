@@ -1387,12 +1387,65 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 #    grid_elv_ave = {}
     stg_DecJul_ave = {}
     stg_AugNov_ave = {}
+    stg_JanAug_ave = {}
+    stg_SepDec_ave = {}
+    stg_JanSep_ave = {}
+    stg_OctDec_ave = {}
+
+
+    max_month = {}
+    for n in range(1,n500grid+1):
+        max_month[n] = -9999
+        max_stage = -9999
+        for mni in range(0,11+1):
+            if stgmdict[n][mni] > max_stage:
+                max_month[n] = mni
+             
+        
     
 #    for gridID in gridIDs:
 #    stg_DecJul_ave[gridID] = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][dec]]))for n in range(1,n500grid+1))
 #    stg_AugNov_ave[gridID] = dict((n,np.mean([stgmndict[n][aug],stgmndict[n][sep],stgmndict[n][octb],stgmndict[n][nov]]))for n in range(1,n500grid+1))
     stg_DecJul_ave = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][dec]]))for n in range(1,n500grid+1))
     stg_AugNov_ave = dict((n,np.mean([stgmndict[n][aug],stgmndict[n][sep],stgmndict[n][octb],stgmndict[n][nov]]))for n in range(1,n500grid+1))
+    
+    stg_JanAug_ave = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][aug]]))for n in range(1,n500grid+1))
+    stg_SepDec_ave = dict((n,np.mean([stgmndict[n][sep],stgmndict[n][octb],stgmndict[n][nov],stgmndict[n][dec]]))for n in range(1,n500grid+1))
+    
+    stg_JanSep_ave = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][aug],[stgmndict[n][sep]]))for n in range(1,n500grid+1))  
+    stg_OctDec_ave = dict((n,np.mean(stgmndict[n][octb],stgmndict[n][nov],stgmndict[n][dec]]))for n in range(1,n500grid+1))                                                                         
+
+    stg_3m__pk_ave = {}
+    stg_9m_npk_ave = {}
+    
+    for n in range(1,n500grid+1):
+        stg_3m__pk_ave[n] = -9999.0
+        stg_9m_npk_ave[n] = -9999.0
+                
+        for mni in range(0,11+1):
+            if mni == 0:
+                pk_months = [11,0,1]
+            else if mni == 11:
+                pk_months = [10,11,0]
+            else:
+                pk_months = [mni-1,mni,mni+1]
+        
+            non_pk_months = []
+            for mnii in range(0,11+1):
+                if mnii not in pk_months:
+                    non_pk_months.append(mnii)           
+        
+        pk3month = 0
+        npk9month = 0
+        for nm in pk_months:
+            pk3month += sgtmndict[n][nm]/3.0
+        for nm in non_pk_months:
+            npk9month += sgtmndict[n][nm]/9.0
+        
+        if pk3month > stg_3m__pk_ave[n]:
+            stg_3m__pk_ave[n] = pk3month
+            stg_9m_npk_ave[n] = npk9month
+    
     
     HSIcsv = r'%sCRAYF.csv' % csv_outprefix
     HSIasc = r'%sCRAYF.asc' % asc_outprefix
