@@ -43,6 +43,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     asc_outprefix = '%s/%s_O_%02d_%02d_X_' % (HSI_dir,runprefix,elapsedyear,elapsedyear)
     csv_outprefix = '%s/%s_O_%02d_%02d_X_' % (HSI_dir,runprefix,elapsedyear,elapsedyear)
     
+    sav_asc_file = '%s/output/%s_O_%02d_%02d_W_SAV.asc' % (wetland_morph_dir,runprefix,elapsedyear,elapsedyear)
 
     e = 2.718281828
     jan,feb,mar,apr,may,jun,jul,aug,sep,octb,nov,dec = 0,1,2,3,4,5,6,7,8,9,10,11
@@ -52,7 +53,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
 
     ascii_grid_lookup = np.genfromtxt(grid_ascii_file,delimiter=' ',  skip_header=6)
     ascii_header='nrows %s \nncols %s \nyllcorner %s \nxllcorner %s \ncellsize 480.0 \nnodata_value -9999.00' % (n500rows,n500cols,yll500,xll500)
-
+    ascii_header_nrows = 6
     
 # generate some dictionaries from the Hydro output files - these combine the monthly output from hydro into mean values for various time frames (e.g. annual, April-July, etc)
 # other input values that are used by specific HSIs will be written and deleted within the respective HSIs to minimize memory requirements
@@ -137,7 +138,6 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     salmardict = {}
     swfordict = {}
     btfordict = {}
-    watsavdict = {}
     baldcypdict = {}
     blackmangrovedict = {}
     marshelderdict = {}
@@ -145,6 +145,19 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     bare_mult = {}
     fresh_for_mult = {}
     land_mult = {}
+    
+    watsavdict = {}
+    sav_in = np.genfromtxt(sav_asc_file,skip_header=6,delimiter=' ',dtype='str')
+    grid_in = np.genfromtxt(grid_ascii_file,skip_header=6,delimiter=' ',dtype='str')
+    nl = 0
+    for line in grid_in:
+        nc = 0
+        for nc in range(0,len(grid_in[nl]))
+            gridID = int(grid_in[nl][nc])
+            watsavdict[gridID] = float(sav_in[nl][nc])
+            nc += 1
+        nl += 1  
+              
 
     # determine portion of cell that is covered by water, land, and different wetland types
     for n in range(0,len(new_veg)):
@@ -173,7 +186,6 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         interdict[gridID]           = pland*new_veg[n][vegtypenames.index('pL_IM')]             # % Intermediate Herbaceous marsh
         brackdict[gridID]           = pland*new_veg[n][vegtypenames.index('pL_BM')]             # % Brackish Herbaceous Marsh
         salmardict[gridID]          = pland*new_veg[n][vegtypenames.index('pL_SM')]             # % Saline Herbaceous Marsh                
-        watsavdict[gridID]          = 0.0#pland*new_veg[n][vegtypenames.index('SAV')]               # Subaqauatic vegetation LULC
         baldcypdict[gridID]         = pland*new_veg[n][vegtypenames.index('TADI2')]             # % Bald cypress
         blackmangrovedict[gridID]   = pland*new_veg[n][vegtypenames.index('AVGE')]              # % Black mangrove
         marshelderdict[gridID]      = pland*new_veg[n][vegtypenames.index('IVFR')]              # % Marsh elder
@@ -185,8 +197,8 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         wetlndict[gridID]           = 1.0 - ( baredict[gridID]                                  \
                                             + new_veg[n][vegtypenames.index('WATER')]           \
                                             + new_veg[n][vegtypenames.index('NOTMOD')] )       # % Marsh Wetland (all types)
+        
 
-                
         # set land multiplier to zero for grid cells that are 100% land
         if waterdict[gridID] == 0.0:
             land_mult[gridID] = 0.0
@@ -1117,8 +1129,8 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             
             for x in range(0,9):    # x is number of columns in depth dictionary (as summarized in WM.HSIreclass)
                 area = area + MotDuckDepdict[gridID][x] #determine area of cell analyzed when developing depth values in morph(not exactly equal to 500x500 since the 30x30 m grid doesn't fit in the 500x500
-                if area < 250000:
-                    area = 500*500
+                if area < 480*480:
+                    area =480*480
                 less0 = MotDuckDepdict[gridID][0]/area   # portion of cell less than 0-cm deep    
                 v3a = MotDuckDepdict[gridID][1]/area    # portion of cell 0-8 cm deep
                 v3b = MotDuckDepdict[gridID][2]/area    # portion of cell 8-30 cm deep 
@@ -1234,8 +1246,8 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             area = 0.0
             for x in range(1,14):
                 area = area + GadwallDepdict[gridID][x]  #determine area of cell (not exactly equal to 500x500 since the 30x30 m grid doesn't fit in the 500x500
-                if area < 250000:
-                    area = 500*500
+                if area < 480*480:
+                    area = 480*480
                 less0 = GadwallDepdict[gridID][0]/area       # portion of cell less than 0 cm deep
                 v3a = GadwallDepdict[gridID][1]/area         # portion of cell 0-4 cm deep
                 v3b = GadwallDepdict[gridID][2]/area         # portion of cell 4-8 cm deep
