@@ -152,7 +152,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     nl = 0
     for line in grid_in:
         nc = 0
-        for nc in range(0,len(grid_in[nl]))
+        for nc in range(0,len(grid_in[nl])):
             gridID = int(grid_in[nl][nc])
             watsavdict[gridID] = float(sav_in[nl][nc])
             nc += 1
@@ -1567,8 +1567,8 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     stg_OctDec_ave = {}
 
 
-    stg_JanSep_ave = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][aug],[stgmndict[n][sep]]))for n in range(1,n500grid+1))  
-    stg_OctDec_ave = dict((n,np.mean(stgmndict[n][octb],stgmndict[n][nov],stgmndict[n][dec]]))for n in range(1,n500grid+1))                                                                         
+    stg_JanSep_ave = dict((n,np.mean([stgmndict[n][jan],stgmndict[n][feb],stgmndict[n][mar],stgmndict[n][apr],stgmndict[n][may],stgmndict[n][jun],stgmndict[n][jul],stgmndict[n][aug],stgmndict[n][sep]]))for n in range(1,n500grid+1))  
+    stg_OctDec_ave = dict((n,np.mean([stgmndict[n][octb],stgmndict[n][nov],stgmndict[n][dec]]))for n in range(1,n500grid+1))                                                                         
       
     HSIcsv = r'%sCRAYF_oct2dec.csv' % csv_outprefix
     HSIasc = r'%sCRAYF_oct2dec.asc' % asc_outprefix
@@ -1657,7 +1657,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         for mni in range(0,11+1):
             if mni == 0:
                 pk_months = [11,0,1]
-            else if mni == 11:
+            elif mni == 11:
                 pk_months = [10,11,0]
             else:
                 pk_months = [mni-1,mni,mni+1]
