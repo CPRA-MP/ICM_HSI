@@ -1670,9 +1670,9 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
         pk3month = 0
         npk9month = 0
         for nm in pk_months:
-            pk3month += sgtmndict[n][nm]/3.0
+            pk3month += stgmndict[n][nm]/3.0
         for nm in non_pk_months:
-            npk9month += sgtmndict[n][nm]/9.0
+            npk9month += stgmndict[n][nm]/9.0
         
         if pk3month > stg_3m__pk_ave[n]:
             stg_3m__pk_ave[n] = pk3month
