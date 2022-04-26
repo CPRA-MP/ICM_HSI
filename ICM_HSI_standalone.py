@@ -326,7 +326,7 @@ for year in range(startyear,endyear+1):
     # check length of timeseries.out files once for year and save total length of file
     daily_timeseries_file = os.path.normpath(r'%s/SAL.out' % ecohydro_dir)
     if os.path.exists(daily_timeseries_file) == False:
-        daily_timeseries_file = os.path.normpath(r'%s/%s_O_%02d_%02d_H_SAL.out' % (ecohydro_dir,runprefix,elapsedyear,elapsedyear) )
+        daily_timeseries_file = os.path.normpath(r'%s/%s_O_01_%02d_H_SAL.out' % (ecohydro_dir,runprefix,endyear-startyear+1) )
     
     ndays_run = file_len(daily_timeseries_file)
       
@@ -357,7 +357,7 @@ for year in range(startyear,endyear+1):
         # read in daily salinity and calculate monthly mean for compartment then map to grid using daily2ave and comp2grid functions
         daily_timeseries_file = os.path.normpath(r'%s/SAL.out' % ecohydro_dir)
         if os.path.exists(daily_timeseries_file) == False:
-            daily_timeseries_file = os.path.normpath(r'%s/%s_O_%02d_%02d_H_SAL.out' % (ecohydro_dir,runprefix,elapsedyear,elapsedyear) )
+            daily_timeseries_file = os.path.normpath(r'%s/%s_O_01_%02d_H_SAL.out' % (ecohydro_dir,runprefix,endyear-startyear+1) )
         comp_month_ave_dict = daily2ave(data_start,ave_start,ave_end,daily_timeseries_file,ndays_run)
         mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
@@ -370,7 +370,7 @@ for year in range(startyear,endyear+1):
         # read in daily temperature and calculate monthly mean for compartment then map to grid using daily2ave and comp2grid functions
         daily_timeseries_file = os.path.normpath(r'%s/TMP.out' % ecohydro_dir)
         if os.path.exists(daily_timeseries_file) == False:
-            daily_timeseries_file = os.path.normpath(r'%s/%s_O_%02d_%02d_H_TMP.out' % (ecohydro_dir,runprefix,elapsedyear,elapsedyear) )
+            daily_timeseries_file = os.path.normpath(r'%s/%s_O_01_%02d_H_TMP.out' % (ecohydro_dir,runprefix,endyear-startyear+1) )
         comp_month_ave_dict = daily2ave(data_start,ave_start,ave_end,daily_timeseries_file,ndays_run)
         mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
@@ -383,7 +383,7 @@ for year in range(startyear,endyear+1):
         # read in daily temperature and calculate monthly mean for compartment then map to grid using daily2ave and comp2grid functions
         daily_timeseries_file = os.path.normpath(r'%s/STG.out' % ecohydro_dir)
         if os.path.exists(daily_timeseries_file) == False:
-            daily_timeseries_file = os.path.normpath(r'%s/%s_O_%02d_%02d_H_STG.out' % (ecohydro_dir,runprefix,elapsedyear,elapsedyear) )
+            daily_timeseries_file = os.path.normpath(r'%s/%s_O_01_%02d_H_STG.out' % (ecohydro_dir,runprefix,endyear-startyear+1) )
         comp_month_ave_dict = daily2ave(data_start,ave_start,ave_end,daily_timeseries_file,ndays_run)
         mon_ave = comp2grid(comp_month_ave_dict,grid_comp)
         # loop through monthly average and append to array of monthly averages in dictionary to be passed into HSI.py
