@@ -1694,7 +1694,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             
             if elv > -9999:
                 depdj = (stg_3m__pk_ave[gridID] - elv)* 100.0
-                depan = (stg_9m__npk_ave[gridID] - elv)* 100.0
+                depan = (stg_9m_npk_ave[gridID] - elv)* 100.0
             else:
                 depdj = -9999.
                 depan = -9999.
