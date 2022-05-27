@@ -345,7 +345,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             s = sal_JanDec_ave[gridID]
             t = tmp_JanDec_ave[gridID]
  
-            v2 = max(0.0,min(wetlndict[gridID] + watsavdict[gridID] + btfordict[gridID] ,100.0))
+            v2 = max(0.0,min(wetlndict[gridID] + btfordict[gridID] ,100.0))
             dayv = 200.0
 
         # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
