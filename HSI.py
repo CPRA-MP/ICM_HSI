@@ -1,34 +1,35 @@
 def HSIascii_grid(HSIcsv,HSIasc,ascii_grid_lookup,n500cols,n500rows,ascii_header):
-    import numpy as np
-    print(' - mapping HSI to ASCII grid')    
-# read HSI csv file into numpy array - usecol = column of csv file that has HSI value
-    newHSI = np.genfromtxt(HSIcsv,delimiter=',',usecols=[0,1],  skip_header=1)
-    newHSIdict = dict((newHSI[n][0],newHSI[n][1])for n in range(0,len(newHSI)))
-    # prepare zero array in same shape of original Veg output ASCII grid
-    newHSIgrid=np.zeros([n500rows,n500cols])
-                    
-    for m in range(0,n500rows):
-        for n in range(0,n500cols):
-            cellID = ascii_grid_lookup[m][n]
-            if cellID == -9999:
-                newHSIgrid[m][n] = -9999
-            else:
-                try:
-                    newHSIval = newHSIdict[cellID] 
-                    if np.isnan(newHSIval):
-                        newHSIgrid[m][n] = -1.0
-                    elif np.isinf(newHSIval):
-                        newHSIgrid[m][n] = -1.0
-                    else:
-                        newHSIgrid[m][n] = newHSIval
-                except:   # if cellID is not a key in the newLULCdictionay - assign cell to NoData
-                    newHSIgrid[m][n] = -9999
-    print( " - saving new HSI ASCII raster file")
-    # save formatted grid to ascii file with appropriate ASCII raster header
-    np.savetxt(HSIasc,newHSIgrid,fmt='%.2f',delimiter=' ',header=ascii_header,comments='')
-    
-    newHSI = 0
-    newHSIdict = {}
+    print(' - skipping: mapping HSI to ASCII grid - will need to post-process from CSVs')
+#inactive#    import numpy as np
+#inactive#    print(' - mapping HSI to ASCII grid')    
+#inactive## read HSI csv file into numpy array - usecol = column of csv file that has HSI value
+#inactive#    newHSI = np.genfromtxt(HSIcsv,delimiter=',',usecols=[0,1],  skip_header=1)
+#inactive#    newHSIdict = dict((newHSI[n][0],newHSI[n][1])for n in range(0,len(newHSI)))
+#inactive#    # prepare zero array in same shape of original Veg output ASCII grid
+#inactive#    newHSIgrid=np.zeros([n500rows,n500cols])
+#inactive#                    
+#inactive#    for m in range(0,n500rows):
+#inactive#        for n in range(0,n500cols):
+#inactive#            cellID = ascii_grid_lookup[m][n]
+#inactive#            if cellID == -9999:
+#inactive#                newHSIgrid[m][n] = -9999
+#inactive#            else:
+#inactive#                try:
+#inactive#                    newHSIval = newHSIdict[cellID] 
+#inactive#                    if np.isnan(newHSIval):
+#inactive#                        newHSIgrid[m][n] = -1.0
+#inactive#                    elif np.isinf(newHSIval):
+#inactive#                        newHSIgrid[m][n] = -1.0
+#inactive#                    else:
+#inactive#                        newHSIgrid[m][n] = newHSIval
+#inactive#                except:   # if cellID is not a key in the newLULCdictionay - assign cell to NoData
+#inactive#                    newHSIgrid[m][n] = -9999
+#inactive#    print( " - saving new HSI ASCII raster file")
+#inactive#    # save formatted grid to ascii file with appropriate ASCII raster header
+#inactive#    np.savetxt(HSIasc,newHSIgrid,fmt='%.2f',delimiter=' ',header=ascii_header,comments='')
+#inactive#    
+#inactive#    newHSI = 0
+#inactive#    newHSIdict = {}
 
 def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_output_filepath,nvegtype,landdict,waterdict,pctsanddict,OWseddep_depth_mm_dict,pctedgedict,cultchdict,n500grid,n500rows,n500cols,yll500,xll500,year,elapsedyear,HSI_dir,vegetation_dir,wetland_morph_dir,runprefix):
     import numpy as np
