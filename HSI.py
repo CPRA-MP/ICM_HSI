@@ -281,7 +281,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             
             s = sal_JanDec_ave[gridID]
             t = tmp_JanDec_ave[gridID]
-            v2 =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))   # I think we get rid of adding btfordict????
+            v2 =  max(0.0,min(wetlndict[gridID],100.0))
             savc = max(0.0,min(watsavdict[gridID],100.0))  
             oysc = max(0.0,min(cultchdict[gridID],1.0))
             dayv = 6.56
@@ -345,7 +345,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             s = sal_JanDec_ave[gridID]
             t = tmp_JanDec_ave[gridID]
  
-            v2 = max(0.0,min(wetlndict[gridID] + btfordict[gridID] ,100.0))
+            v2 = max(0.0,min(wetlndict[gridID] ,100.0))
             dayv = 200.0
 
         # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
@@ -432,7 +432,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
             sj = sal_JanAug_ave[gridID]
             tj = tmp_JanAug_ave[gridID]
-            v2j = max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
+            v2j = max(0.0,min(wetlndict[gridID],100.0))
             dayvj = 119.9
 
         # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
@@ -501,7 +501,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
             sa = sal_MarNov_ave[gridID]
             ta = tmp_MarNov_ave[gridID]
-            v2a = max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
+            v2a = max(0.0,min(wetlndict[gridID],100.0))
             dayva = 180.1
 
         # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
@@ -571,7 +571,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
             sj = sal_AprJul_ave[gridID]                
             tj = tmp_AprJul_ave[gridID]               
-            v2j =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
+            v2j =  max(0.0,min(wetlndict[gridID],100.0))
             savc = max(0.0,min(watsavdict[gridID],100.0))
             oysc = max(0.0,min(cultchdict[gridID],1.0))    # 2023 Update -- SES 7/1/20 Eric setting oyster cultch to mean oyster HSI for previous decade, calibration period for first decade
             dayvj = 149.1     # set to mean julian date from WQ SI memo (Ann H and Laura D) for information only - not used
@@ -815,7 +815,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
             sj = sal_SepNov_ave[gridID]
             tj = tmp_SepNov_ave[gridID]
-            v2j =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
+            v2j =  max(0.0,min(wetlndict[gridID],100.0))
             savc = max(0.0,min(watsavdict[gridID],100.0))
             dayvj = 289.0
 
@@ -886,7 +886,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
             sa = sal_JanDec_ave[gridID]
             ta = tmp_JanDec_ave[gridID]
-            v2a = max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))
+            v2a = max(0.0,min(wetlndict[gridID],100.0))
             dayva = 180.1
 
     # truncate salinity and temperature to max values in GAMM lookup tables - temp also is truncated at a minimum value
@@ -962,7 +962,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             zero_mult = land_mult[gridID]*fresh_for_mult[gridID]*bare_mult[gridID]
             sj = sal_JunDec_ave[gridID]   
             tj = tmp_JunDec_ave[gridID]
-            v2j =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))  # Eric: I don't follow why btfor added to wetland? Btfor = swafor but forests not same as wetlands for species
+            v2j =  max(0.0,min(wetlndict[gridID],100.0))
             savc = max(0.0,min(watsavdict[gridID],100.0))
             oysc = max(0.0,min(cultchdict[gridID],1.0))    # 2023 Update -- SES 7/1/20 Eric setting oyster cultch to mean oyster HSI for previous decade, calibration period for first decade
             dayvj = 266.4   # set to mean julian date from WQ SI memo for information - not used
@@ -1864,7 +1864,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             S1 = 1.0*(v1a/100.) + 0.7*(v1b/100.) + 0.3*(v1c/100.)   # divde by 100 to go from percent to proportion veg type for equation
            
     #   why is btfordict added to wetlndict?  the equation is from fish hsis for percent marsh (wetland)
-            v2 =  max(0.0,min(wetlndict[gridID]+btfordict[gridID],100.0))   # percent of cell that is wetland (includes floating marsh as of 6/30/20)
+            v2 =  max(0.0,min(wetlndict[gridID],100.0))   # percent of cell that is wetland (includes floating marsh as of 6/30/20)
 
             if v2 < 65.:                       
                 S2 = 0.0154*v2                                        
