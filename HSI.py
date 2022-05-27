@@ -1774,7 +1774,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
                 deprelmar = 9.999
             
             baldcyp = baldcypdict[gridID]
-            fresh = max(0.0,min(frfltdict[gridID] + frattdict[gridID],1.0))
+            fresh = max(0.0,min(frfltdict[gridID], 1.0))
             inter = interdict[gridID]
             brack = brackdict[gridID]
 #           deep = 100.0*deepwat[gridID]  #deepwat is the portion of the cell that is deeper than 1.5 meters (calculated from Gadwall depths)
