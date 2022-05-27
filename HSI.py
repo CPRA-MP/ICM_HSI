@@ -597,7 +597,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
                 if oysc >= 0.5:             # if oyster HSI greater than 0.5 or sav cover greater than 20. then use different S2s function
                     S2j = 0.02*v2j+0.5     
                 if savc >= 20.:             
-                    S2s = 0.008*v2j+0.8
+                    S2j = 0.008*v2j+0.8
             elif v2j >= 25.0 and v2j <= 80.0:
                 S2j = 1.0
             else:
