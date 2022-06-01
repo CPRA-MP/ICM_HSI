@@ -1912,11 +1912,10 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
     for pair in gridlookup:
         small_grid = pair[0]
         large_grid = pair[1]
-        
-        if large_grid not in grid_6k_500.keys():
-            grid_6k_500[large_grid] = []
-        
-        grid_6k_500[large_grid].append(small_grid)
+        if large_grid > 0:
+            if large_grid not in grid_6k_500.keys():
+                grid_6k_500[large_grid] = []
+            grid_6k_500[large_grid].append(small_grid)
     
     with open(HSIcsv,'w') as fSp:
       
