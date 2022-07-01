@@ -197,7 +197,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
                                       + new_veg[n][vegtypenames.index('PAHE2_Flt')]             # Live floating marsh LULC
         baredict[gridID]            = new_veg[n][vegtypenames.index('BAREGRND_Flt')]    \
                                       + new_veg[n][vegtypenames.index('BAREGRND_OLD')]  \
-                                      + new_veg[n][vegtypenames.index('BAREGRND_NEW')] )        # % Bareground (including bare flotant)
+                                      + new_veg[n][vegtypenames.index('BAREGRND_NEW')]          # % Bareground (including bare flotant)
         wetlndict[gridID]           = 1.0 - ( baredict[gridID]                          \
                                             + new_veg[n][vegtypenames.index('WATER')]   \
                                             + new_veg[n][vegtypenames.index('NOTMOD')] )       # % Marsh Wetland (all types, including flotant)
@@ -1933,20 +1933,20 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             
             # append all values from smaller grids into 1d array for the larger 6-km grid cell
             for gridID in grid_6k_500[gridID_6k]:
-                wat_all.append(waterdict[gridID]                        # 2023 HSI calls for open water habitat - is this it?
-                v1a_all.append(uplanddict[gridID]                       # 2023 HSI calls for upland/developed habitat???  I put bareground in as placeholder???
-                v1b_all.append(frattdict[gridID]                        # fresh attached marsh 
-                v1c_all.append(frfltdict[gridID]                        # fresh floating marsh (V1d)
-                v1d_all.append(interdict[gridID]                        # intermed marsh (V1c)
+                wat_all.append(waterdict[gridID])                       # 2023 HSI calls for open water habitat - is this it?
+                v1a_all.append(uplanddict[gridID])                      # 2023 HSI calls for upland/developed habitat???  I put bareground in as placeholder???
+                v1b_all.append(frattdict[gridID])                       # fresh attached marsh 
+                v1c_all.append(frfltdict[gridID])                       # fresh floating marsh (V1d)
+                v1d_all.append(interdict[gridID])                       # intermed marsh (V1c)
                 v1e_all.append(swfordict[gridID] + btfordict[gridID])   # forest = swamp forest (V1g) + bottomland forest
      
              # calculate average values for each 6-km grid cell that will be used to calculate S values at the 6-km grid cell below
-             wat = sum(wat_all)/len(wat_all)
-             v1a = sum(v1a_all)/len(v1a_all)
-             v1b = sum(v1b_all)/len(v1b_all)
-             v1c = sum(v1c_all)/len(v1c_all)
-             v1d = sum(v1d_all)/len(v1d_all)
-             v1u = sum(v1e_all)/len(v1e_all)
+            wat = sum(wat_all)/len(wat_all)
+            v1a = sum(v1a_all)/len(v1a_all)
+            v1b = sum(v1b_all)/len(v1b_all)
+            v1c = sum(v1c_all)/len(v1c_all)
+            v1d = sum(v1d_all)/len(v1d_all)
+            v1u = sum(v1e_all)/len(v1e_all)
     
                                
     # for upland/developed habitat percent cover:
