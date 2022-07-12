@@ -1946,7 +1946,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
             v1b = sum(v1b_all)/len(v1b_all)
             v1c = sum(v1c_all)/len(v1c_all)
             v1d = sum(v1d_all)/len(v1d_all)
-            v1u = sum(v1e_all)/len(v1e_all)
+            v1e = sum(v1e_all)/len(v1e_all)
     
                                
     # for upland/developed habitat percent cover:
