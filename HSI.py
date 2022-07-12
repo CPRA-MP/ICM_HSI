@@ -1979,7 +1979,7 @@ def HSI(gridIDs,stagedict,stgmndict,bedelevdict,melevdict,saldict,tmpdict,veg_ou
                 HSI_Eag = ((S1)**0.0104 * (S3)**0.3715 * (S5)**0.4743 * (S2)**0.0330 * (S4)**0.0353 * (S6)**0.0669)**(0.991)
 
          
-            writestring = '%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID_6km,HSI_Eag,wat,v1a,v1b,v1c,v1d,v1e) 
+            writestring = '%s,%s,%s,%s,%s,%s,%s,%s\n' %(gridID_6k,HSI_Eag,wat,v1a,v1b,v1c,v1d,v1e) 
             fSp.write(writestring)
 
 # map eagle HSI to Ascii grid
