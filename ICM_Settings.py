@@ -11,7 +11,10 @@ HSI_standalone = True # Run HSI in Standalone Mode; must have existing EcoHyd, V
 par_dir = os.getcwd()
 
 #TODO this file name for the CSV should be rectified once ICM and HSI models are merged
-inputs = np.genfromtxt('ICM_HSI_control.csv',dtype=str,comments='#',delimiter=',')
+if HSI_standalone:
+    inputs = np.genfromtxt('ICM_HSI_control.csv',dtype=str,comments='#',delimiter=',')
+else:
+    inputs = np.genfromtxt('ICM_control.csv',dtype=str,comments='#',delimiter=',')
 
 # Parent directory locations for various ICM components
 # These directories must exist in the model folder
