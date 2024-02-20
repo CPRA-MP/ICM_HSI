@@ -7,7 +7,7 @@
 #ICM imports
 import HSI_Main as hsi_main
 import ICM_HelperFunctions as hf
-import ICM_PreProcessing as icm_pp
+# import ICM_PreProcessing as icm_pp
 import ICM_Settings as icm
 
 #Python imports
@@ -52,16 +52,16 @@ if not HSI_Standalone:
     print('--------------------------------------------------')
 
     #TODO check, this may also be a spot that could benefit from globals
-    hyd_switch_years, hyd_file_orig, hyd_file_new, hyd_file_bk, links_to_change, link_years, \
-        FWA_prj_input_dir_MC, FWA_prj_input_dir_RR, FWA_prj_input_dir_BS, mc_elementIDs, mc_years, \
-        mc_eid_with_deep_fill, mc_depth_threshold_def, mc_depth_threshold_deep, mc_links, mc_links_years, \
-        sp_projectIDs, sp_years, rr_projectIDs, rr_years, comps_to_change_elev, comp_elevs, comp_years, \
-        act_del_files, act_del_years = icm_pp.ICMVars()
+    # hyd_switch_years, hyd_file_orig, hyd_file_new, hyd_file_bk, links_to_change, link_years, \
+    #     FWA_prj_input_dir_MC, FWA_prj_input_dir_RR, FWA_prj_input_dir_BS, mc_elementIDs, mc_years, \
+    #     mc_eid_with_deep_fill, mc_depth_threshold_def, mc_depth_threshold_deep, mc_links, mc_links_years, \
+    #     sp_projectIDs, sp_years, rr_projectIDs, rr_years, comps_to_change_elev, comp_elevs, comp_years, \
+    #     act_del_files, act_del_years = icm_pp.ICMVars()
 
 
     #TODO need to determine whether this step is necessary, all of these lists should be empty
     # check that project implementation variables are of the correct lengths
-    hf.check_var_lengths(links_to_change, link_years, mc_elementIDs, mc_years, mc_links, mc_links_years, sp_projectIDs, sp_years, rr_projectIDs, rr_years, act_del_files, act_del_years)
+    # hf.check_var_lengths(links_to_change, link_years, mc_elementIDs, mc_years, mc_links, mc_links_years, sp_projectIDs, sp_years, rr_projectIDs, rr_years, act_del_files, act_del_years)
 
 
     #########################################################
