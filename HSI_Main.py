@@ -17,10 +17,6 @@ import sys
 
 def RunHSI(startyear, endyear):
 
-    # change working directory to veg folder
-    os.chdir(HSI_dir)
-    sys.path.append(HSI_dir)
-    
     #defined variables
     HSI_dir = icm.HSI_dir
     gridIDs = icm.gridIDs
@@ -30,6 +26,10 @@ def RunHSI(startyear, endyear):
     ascii_header_nrows = icm.ascii_header_nrows
     n500rows = icm.n500rows
     n500cols = icm.n500cols
+
+    # change working directory to veg folder
+    os.chdir(HSI_dir)
+    sys.path.append(HSI_dir)
 
     for year in range(startyear,endyear+1):
 
