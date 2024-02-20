@@ -9,7 +9,8 @@ def HSI_BlueCrab(HSI_dir,csv_outprefix,asc_outprefix,gridIDs,land_mult,fresh_for
     ########################################
     print( ' Calculating Blue Crab HSI')
     
-    months2use = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'octb', 'nov', 'dec']
+    #months for averaging salinity and temperature data
+    months2use = {1:'jan', 2:'feb', 3:'mar', 4:'apr', 5:'may', 6:'jun', 7:'jul', 8:'aug', 9:'sep', 10:'octb', 11:'nov', 12:'dec'}
 
     # read in GAMM lookup table for sal/temp combinations
     blucj_gamm_seine = {}

@@ -8,8 +8,10 @@ def HSI_AdultMenhaden(HSI_dir,csv_outprefix,asc_outprefix,gridIDs,land_mult,fres
     ###     Adult Gulf Menhaden HSI        ##
     #########################################
 
+    print( ' Calculating Adult Gulf Menhaden HSI')
+
     #months for averaging salinity and temperature data
-    months2use = ['mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'octb', 'nov']
+    months2use = {3:'mar', 4:'apr', 5:'may', 6:'jun', 7:'jul', 8:'aug', 9:'sep', 10:'octb', 11:'nov'}
 
     gmena_gamm_gilln = {}
     gmena_gilln_file = os.path.normpath('%s/gillnet_gulfmenhaden_gamm_table_1dec.txt' % HSI_dir)
