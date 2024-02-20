@@ -144,7 +144,7 @@ gridIDs=grid_comp.keys()
 
 # run HSIascii_grid for each species
 map2grid = False
-ascii_grid_lookup,ascii_header,ascii_header_nrows,n500rows,n500cols  = hf.create_ASCII_grid_vals(vegetation_dir,n500rows,n500cols,yll500,xll500)
+grid_ascii_file, ascii_grid_lookup,ascii_header,ascii_header_nrows,n500rows,n500cols  = hf.create_ASCII_grid_vals(vegetation_dir,n500rows,n500cols,yll500,xll500)
 
 
     

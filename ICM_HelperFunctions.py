@@ -549,7 +549,7 @@ def create_ASCII_grid_vals(vegetation_dir,n500rows,n500cols,yll500,xll500):
     ascii_header='nrows %s \nncols %s \nyllcorner %s \nxllcorner %s \ncellsize 480.0 \nnodata_value -9999.00' % (n500rows,n500cols,yll500,xll500)
     ascii_header_nrows = 6 #TODO check to see if this is needed
     
-    return ascii_grid_lookup,ascii_header,ascii_header_nrows,n500rows,n500cols 
+    return grid_ascii_file, ascii_grid_lookup,ascii_header,ascii_header_nrows,n500rows,n500cols 
 
 
 def create_domdict(year):
